@@ -82,10 +82,11 @@
                 </div>
             </div>
             
-            <div class="p-6 flex-1 overflow-y-auto custom-scrollbar space-y-8">
+            <div class="p-6 flex-1 overflow-y-auto custom-scrollbar space-y-6">
                 <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
                     <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Global Average</p>
                     <p id="global-avg" class="text-3xl font-bold text-white">0.00</p>
+                    <p class="text-[10px] text-slate-500 mt-1">Across all semesters</p>
                 </div>
 
                 <div>
@@ -94,14 +95,17 @@
                         <button class="w-full flex items-center gap-3 bg-blue-500/10 text-blue-400 p-3 rounded-lg font-medium transition">
                             <i data-lucide="layout-dashboard" size="18"></i> Dashboard
                         </button>
+                        <button onclick="openReportCard()" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
+                            <i data-lucide="file-badge" size="18"></i> Report Card
+                        </button>
                         <button onclick="openModal('custom-fields-modal')" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
                             <i data-lucide="columns" size="18"></i> Edit Columns
                         </button>
-                        <button onclick="openModal('subject-modal')" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
-                            <i data-lucide="plus-circle" size="18"></i> Add Subject
-                        </button>
                         <button onclick="openDreamModal()" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
                             <i data-lucide="sparkles" size="18"></i> Dream Grade
+                        </button>
+                        <button onclick="openModal('subject-modal')" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
+                            <i data-lucide="plus-circle" size="18"></i> Add Subject
                         </button>
                     </div>
                 </div>
@@ -115,19 +119,25 @@
         </aside>
 
         <main class="flex-1 flex flex-col h-full bg-[#0b0f19] relative overflow-hidden">
-            <header class="p-8 pb-4 flex justify-between items-end shrink-0">
-                <div>
-                    <div class="flex items-center gap-4 mb-2">
-                        <button onclick="prevSubject()" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition"><i data-lucide="chevron-left" size="20"></i></button>
-                        <h2 id="current-subject-title" class="text-3xl font-bold tracking-tight">No Subjects</h2>
-                        <button onclick="nextSubject()" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition"><i data-lucide="chevron-right" size="20"></i></button>
-                        <button onclick="deleteSubject()" class="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition ml-2" title="Delete Subject"><i data-lucide="trash-2" size="20"></i></button>
+            <header class="p-8 pb-4 flex flex-col shrink-0 gap-6 border-b border-slate-800">
+                
+                <div id="semester-tabs-container" class="flex items-center gap-4 overflow-x-auto custom-scrollbar pb-2 w-full">
                     </div>
-                    <p class="text-slate-400 text-sm">Manage your categories and custom columns below.</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-sm text-slate-400 font-medium">Subject Average</p>
-                    <p id="subject-avg" class="text-4xl font-bold tracking-tight">N/A</p>
+
+                <div class="flex justify-between items-end w-full">
+                    <div>
+                        <div class="flex items-center gap-4 mb-2">
+                            <button onclick="prevSubject()" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition"><i data-lucide="chevron-left" size="20"></i></button>
+                            <h2 id="current-subject-title" class="text-3xl font-bold tracking-tight">No Subjects</h2>
+                            <button onclick="nextSubject()" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition"><i data-lucide="chevron-right" size="20"></i></button>
+                            <button onclick="deleteSubject()" class="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition ml-2" title="Delete Subject"><i data-lucide="trash-2" size="20"></i></button>
+                        </div>
+                        <p class="text-slate-400 text-sm">Manage your categories and custom columns below.</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-slate-400 font-medium">Subject Average</p>
+                        <p id="subject-avg" class="text-4xl font-bold tracking-tight">N/A</p>
+                    </div>
                 </div>
             </header>
 
@@ -164,7 +174,7 @@
         
         <div id="subject-modal" class="hidden bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-sm shadow-2xl transform scale-95 transition-transform duration-300">
             <h3 class="text-xl font-bold mb-4">Add New Subject</h3>
-            <input type="text" id="subject-input" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 mb-6 focus:border-blue-500 outline-none" placeholder="e.g., Mathematics">
+            <input type="text" id="subject-input" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 mb-6 focus:border-blue-500 outline-none" placeholder="e.g., ABU">
             <div class="flex gap-3">
                 <button onclick="closeModals()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition">Cancel</button>
                 <button onclick="saveSubject()" class="flex-1 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition">Save</button>
@@ -173,7 +183,7 @@
 
         <div id="category-modal" class="hidden bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-sm shadow-2xl transform scale-95 transition-transform duration-300">
             <h3 class="text-xl font-bold mb-4">Add Category</h3>
-            <input type="text" id="category-input" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 mb-6 focus:border-blue-500 outline-none" placeholder="e.g., Midterms">
+            <input type="text" id="category-input" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 mb-6 focus:border-blue-500 outline-none" placeholder="e.g., Sprache & Kommunikation">
             <div class="flex gap-3">
                 <button onclick="closeModals()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition">Cancel</button>
                 <button onclick="saveCategory()" class="flex-1 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition">Save</button>
@@ -185,9 +195,15 @@
             <input type="hidden" id="grade-edit-index" value="-1">
             <div class="overflow-y-auto custom-scrollbar flex-1 pr-2 mb-6">
                 <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Grade (e.g. 1.0 - 6.0)</label>
-                        <input type="number" step="0.1" id="grade-val" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none">
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-xs text-slate-400 mb-1">Grade (1.0 - 6.0)</label>
+                            <input type="number" step="0.1" id="grade-val" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-xs text-slate-400 mb-1">Weight (e.g., 1 or 0.5)</label>
+                            <input type="number" step="0.1" id="grade-weight" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none" value="1">
+                        </div>
                     </div>
                     <div class="flex gap-4">
                         <div class="flex-1">
@@ -246,10 +262,17 @@
                         <option value="global">All Subjects (Global)</option>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">Remaining Exams</label>
-                    <input type="number" id="dream-remaining" step="1" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none" placeholder="How many exams left?">
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="block text-xs text-slate-400 mb-1">Remaining Exams</label>
+                        <input type="number" id="dream-remaining" step="1" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none" value="1">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs text-slate-400 mb-1">Weight (Per Exam)</label>
+                        <input type="number" id="dream-future-weight" step="0.1" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none" value="1">
+                    </div>
                 </div>
+                
                 <div id="dream-result-box" class="hidden p-4 rounded-xl bg-blue-600/10 border border-blue-500/30">
                     <p class="text-sm text-slate-300">To reach a final <span id="dream-rounded-target-label" class="font-bold text-white">--</span> (needs a <span id="dream-min-avg-label">--</span> avg), you need:</p>
                     <p id="dream-needed-rounded" class="text-5xl font-bold text-blue-400 mt-2">--</p>
@@ -266,17 +289,50 @@
                 <button onclick="calculateDreamGrade()" class="flex-1 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition font-bold">Calculate</button>
             </div>
         </div>
+
+        <div id="report-card-modal" class="hidden bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-lg shadow-2xl transform scale-95 transition-transform duration-300">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i data-lucide="file-badge" class="text-blue-400"></i> Zeugnis Report
+                </h3>
+                <span id="report-card-semester" class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg text-sm font-bold"></span>
+            </div>
+            
+            <div class="overflow-y-auto custom-scrollbar max-h-72 mb-6 pr-2">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="border-b border-slate-700 sticky top-0 bg-slate-900">
+                        <tr>
+                            <th class="pb-2 text-slate-400 font-semibold">Subject</th>
+                            <th class="pb-2 text-slate-400 font-semibold text-right">Average</th>
+                        </tr>
+                    </thead>
+                    <tbody id="report-card-body" class="divide-y divide-slate-800/50">
+                        </tbody>
+                </table>
+            </div>
+
+            <div class="bg-slate-800 p-4 rounded-xl flex justify-between items-center border border-slate-700 shadow-inner">
+                <span class="text-slate-300 font-medium tracking-wide uppercase text-sm">Semester Average</span>
+                <span id="report-card-total" class="text-3xl font-bold text-white">--</span>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button onclick="closeModals()" class="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition font-bold w-full">Close Report</button>
+            </div>
+        </div>
+
     </div>
 
    <script>
         let state = {
             user: null,
-            subjects: {}, 
+            semesters: {}, // Semester wrapper
+            currentSemester: 'Semester 1',
             currentSubject: null,
             currentCategory: 'General'
         };
 
-        // --- Auto-Login ---
+        // --- Auto-Login & Data Migration ---
         window.onload = async () => {
             try {
                 const res = await fetch('/api/me');
@@ -286,12 +342,39 @@
                     
                     const dataRes = await fetch('/api/data');
                     const dataJson = await dataRes.json();
-                    state.subjects = dataJson.subjects || {};
                     
-                    const subjectKeys = Object.keys(state.subjects);
+                    let loadedData = dataJson.subjects || {};
+                    
+                    // SMART MIGRATION: Check if data is using the old format
+                    const firstKey = Object.keys(loadedData)[0];
+                    let isOldFormat = false;
+                    if (firstKey) {
+                        const firstChildKey = Object.keys(loadedData[firstKey])[0];
+                        if (firstChildKey && (Array.isArray(loadedData[firstKey][firstChildKey]) || loadedData[firstKey][firstChildKey].grades !== undefined)) {
+                            isOldFormat = true;
+                        }
+                    }
+
+                    if (isOldFormat || Object.keys(loadedData).length === 0) {
+                        state.semesters = { "Semester 1": loadedData };
+                    } else {
+                        state.semesters = loadedData;
+                    }
+                    
+                    // ENFORCE 8 SEMESTERS ALWAYS EXIST
+                    for(let i = 1; i <= 8; i++) {
+                        if(!state.semesters[`Semester ${i}`]) {
+                            state.semesters[`Semester ${i}`] = {};
+                        }
+                    }
+
+                    state.currentSemester = Object.keys(state.semesters)[0] || "Semester 1";
+                    
+                    const currentSubjects = state.semesters[state.currentSemester] || {};
+                    const subjectKeys = Object.keys(currentSubjects);
                     state.currentSubject = subjectKeys.length > 0 ? subjectKeys[0] : null;
                     if(state.currentSubject) {
-                        state.currentCategory = Object.keys(state.subjects[state.currentSubject])[0] || 'General';
+                        state.currentCategory = Object.keys(currentSubjects[state.currentSubject])[0] || 'General';
                     }
                     
                     document.getElementById('login-screen').classList.add('hidden');
@@ -345,13 +428,28 @@
         async function saveData() {
             if(state.user) {
                 try {
+                    // Send semesters wrapped in "subjects" key to avoid changing backend
                     await fetch('/api/data', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ subjects: state.subjects })
+                        body: JSON.stringify({ subjects: state.semesters }) 
                     });
                 } catch(e) { console.error("Failed to save", e); }
             }
+        }
+
+        // --- SEMESTER LOGIC ---
+        function changeSemester(semName) {
+            state.currentSemester = semName;
+            const subjects = state.semesters[semName];
+            const subjectKeys = Object.keys(subjects);
+            state.currentSubject = subjectKeys.length > 0 ? subjectKeys[0] : null;
+            if (state.currentSubject) {
+                state.currentCategory = Object.keys(subjects[state.currentSubject])[0] || 'General';
+            } else {
+                state.currentCategory = 'General';
+            }
+            refreshUI();
         }
 
         function evaluateGradeFormula(formula, points, max) {
@@ -369,7 +467,7 @@
 
         function toggleCalculatorField(add) {
             if(!state.currentSubject) return;
-            const categoryData = state.subjects[state.currentSubject][state.currentCategory];
+            const categoryData = state.semesters[state.currentSemester][state.currentSubject][state.currentCategory];
             if(add) {
                 categoryData.showCalculatedGrade = true;
                 if(!categoryData.formula) categoryData.formula = 'points * 5 / max + 1';
@@ -383,7 +481,7 @@
 
         function updateFormula(value) {
             if(!state.currentSubject || !state.currentCategory) return;
-            const categoryData = state.subjects[state.currentSubject][state.currentCategory];
+            const categoryData = state.semesters[state.currentSemester][state.currentSubject][state.currentCategory];
             categoryData.formula = value.trim() || 'points * 5 / max + 1';
             saveData();
             refreshUI();
@@ -391,7 +489,6 @@
 
         // --- MODALS ---
         function openModal(id) {
-            // If trying to edit columns but no subject exists, alert the user
             if(id === 'custom-fields-modal' && !state.currentSubject) {
                 return alert("Please create and select a subject first!");
             }
@@ -399,8 +496,7 @@
             const backdrop = document.getElementById('modal-backdrop');
             const target = document.getElementById(id);
             
-            // Hide all modals first
-            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal', 'dream-modal'].forEach(m => {
+            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal', 'dream-modal', 'report-card-modal'].forEach(m => {
                 document.getElementById(m).classList.add('hidden');
             });
 
@@ -421,17 +517,71 @@
         function closeModals() {
             const backdrop = document.getElementById('modal-backdrop');
             backdrop.classList.add('opacity-0');
-            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal', 'dream-modal'].forEach(m => {
+            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal', 'dream-modal', 'report-card-modal'].forEach(m => {
                 document.getElementById(m).classList.replace('scale-100', 'scale-95');
             });
             setTimeout(() => { backdrop.classList.add('hidden'); }, 300);
         }
 
+        function openReportCard() {
+            const tbody = document.getElementById('report-card-body');
+            const totalLabel = document.getElementById('report-card-total');
+            const semLabel = document.getElementById('report-card-semester');
+            
+            semLabel.innerText = state.currentSemester;
+            tbody.innerHTML = '';
+            
+            const subjects = state.semesters[state.currentSemester] || {};
+            let semesterSum = 0;
+            let semesterCount = 0;
+            
+            Object.keys(subjects).forEach(subjName => {
+                let subjTotal = 0;
+                let subjWeightCount = 0;
+                
+                Object.values(subjects[subjName]).forEach(catData => {
+                    const grades = Array.isArray(catData) ? catData : (catData.grades || []);
+                    grades.forEach(g => {
+                        let w = g.weight !== undefined ? g.weight : 1;
+                        subjTotal += (g.note * w);
+                        subjWeightCount += w;
+                    });
+                });
+                
+                let subjAvg = subjWeightCount > 0 ? (subjTotal / subjWeightCount) : 0;
+                
+                if (subjWeightCount > 0) {
+                    semesterSum += subjAvg;
+                    semesterCount++;
+                    
+                    const colorClass = getGradeColorClass(subjAvg);
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-800/30 transition">
+                            <td class="py-3 px-2 text-slate-300 font-medium">${subjName}</td>
+                            <td class="py-3 px-2 text-right font-bold text-lg ${colorClass}">${subjAvg.toFixed(2)}</td>
+                        </tr>
+                    `;
+                }
+            });
+            
+            if (semesterCount === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-slate-500 italic">No grades yet in this semester.</td></tr>';
+                totalLabel.innerText = 'N/A';
+                totalLabel.className = 'text-3xl font-bold text-slate-500';
+            } else {
+                const finalAvg = semesterSum / semesterCount;
+                totalLabel.innerText = finalAvg.toFixed(2);
+                totalLabel.className = `text-3xl font-bold ${getGradeColorClass(finalAvg)}`;
+            }
+            
+            openModal('report-card-modal');
+        }
+
         // --- SUBJECTS & CATEGORIES ---
         function saveSubject() {
             const name = document.getElementById('subject-input').value.trim();
-            if(name && !state.subjects[name]) {
-                state.subjects[name] = { "General": { grades: [], customFields: [] } };
+            if(name && !state.semesters[state.currentSemester][name]) {
+                state.semesters[state.currentSemester][name] = { "General": { grades: [], customFields: [] } };
                 state.currentSubject = name;
                 state.currentCategory = "General";
                 document.getElementById('subject-input').value = "";
@@ -443,10 +593,10 @@
         function deleteSubject() {
             if(!state.currentSubject) return;
             if(confirm(`Delete subject '${state.currentSubject}'?`)) {
-                delete state.subjects[state.currentSubject];
-                const keys = Object.keys(state.subjects);
+                delete state.semesters[state.currentSemester][state.currentSubject];
+                const keys = Object.keys(state.semesters[state.currentSemester]);
                 state.currentSubject = keys.length > 0 ? keys[0] : null;
-                state.currentCategory = state.currentSubject ? Object.keys(state.subjects[state.currentSubject])[0] : null;
+                state.currentCategory = state.currentSubject ? Object.keys(state.semesters[state.currentSemester][state.currentSubject])[0] : null;
                 refreshUI();
             }
         }
@@ -454,8 +604,8 @@
         function saveCategory() {
             if(!state.currentSubject) return;
             const name = document.getElementById('category-input').value.trim();
-            if(name && !state.subjects[state.currentSubject][name]) {
-                state.subjects[state.currentSubject][name] = { grades: [], customFields: [] };
+            if(name && !state.semesters[state.currentSemester][state.currentSubject][name]) {
+                state.semesters[state.currentSemester][state.currentSubject][name] = { grades: [], customFields: [] };
                 state.currentCategory = name;
                 document.getElementById('category-input').value = "";
                 closeModals();
@@ -466,10 +616,10 @@
         function deleteCategory() {
             if(!state.currentSubject || !state.currentCategory) return;
             if(confirm(`Delete category '${state.currentCategory}'?`)) {
-                delete state.subjects[state.currentSubject][state.currentCategory];
-                const keys = Object.keys(state.subjects[state.currentSubject]);
+                delete state.semesters[state.currentSemester][state.currentSubject][state.currentCategory];
+                const keys = Object.keys(state.semesters[state.currentSemester][state.currentSubject]);
                 if(keys.length === 0) {
-                    state.subjects[state.currentSubject]["General"] = { grades: [], customFields: [] };
+                    state.semesters[state.currentSemester][state.currentSubject]["General"] = { grades: [], customFields: [] };
                     state.currentCategory = "General";
                 } else {
                     state.currentCategory = keys[0];
@@ -484,7 +634,7 @@
             const fieldName = document.getElementById('new-field-input').value.trim();
             if(!fieldName) return;
             
-            const categoryData = state.subjects[state.currentSubject][state.currentCategory];
+            const categoryData = state.semesters[state.currentSemester][state.currentSubject][state.currentCategory];
             if(!categoryData.customFields) categoryData.customFields = [];
             
             if(!categoryData.customFields.find(f => f.name.toLowerCase() === fieldName.toLowerCase())) {
@@ -492,13 +642,13 @@
                 document.getElementById('new-field-input').value = '';
                 renderCustomFieldsList();
                 saveData();
-                refreshUI(); // Update the table header immediately
+                refreshUI(); 
             }
         }
 
         function deleteCustomField(fieldName) {
             if(!state.currentSubject || !state.currentCategory) return;
-            const categoryData = state.subjects[state.currentSubject][state.currentCategory];
+            const categoryData = state.semesters[state.currentSemester][state.currentSubject][state.currentCategory];
             categoryData.customFields = categoryData.customFields.filter(f => f.name !== fieldName);
             
             categoryData.grades.forEach(g => {
@@ -512,7 +662,7 @@
 
         function moveColumn(index, direction) {
             if(!state.currentSubject || !state.currentCategory) return;
-            let cols = state.subjects[state.currentSubject][state.currentCategory].customFields;
+            let cols = state.semesters[state.currentSemester][state.currentSubject][state.currentCategory].customFields;
             if(direction === -1 && index > 0) {
                 [cols[index-1], cols[index]] = [cols[index], cols[index-1]];
             } else if (direction === 1 && index < cols.length - 1) {
@@ -523,10 +673,9 @@
 
         function renderCustomFieldsList() {
             if(!state.currentSubject || !state.currentCategory) return;
-            const categoryData = state.subjects[state.currentSubject][state.currentCategory];
+            const categoryData = state.semesters[state.currentSemester][state.currentSubject][state.currentCategory];
             const customFields = categoryData.customFields || [];
             
-            // Render the Toggle Switch for the Calculated Grade
             const toggleContainer = document.getElementById('calc-field-toggle');
             if (toggleContainer) {
                 const isShowingCalc = categoryData.showCalculatedGrade || false;
@@ -556,7 +705,6 @@
                 `;
             }
 
-            // Render the rest of the Custom Fields
             const container = document.getElementById('custom-fields-list');
             container.innerHTML = customFields.map(field => `
                 <div class="flex items-center justify-between bg-slate-800/50 p-3 rounded-lg border border-slate-700">
@@ -575,7 +723,7 @@
             if(!state.currentSubject) return alert("Create a subject first.");
             document.getElementById('grade-edit-index').value = editIndex;
             
-            const categoryData = state.subjects[state.currentSubject][state.currentCategory];
+            const categoryData = state.semesters[state.currentSemester][state.currentSubject][state.currentCategory];
             const gradesList = Array.isArray(categoryData) ? categoryData : categoryData.grades;
             
             let grade = null;
@@ -583,12 +731,14 @@
                 document.getElementById('grade-modal-title').innerText = "Edit Grade";
                 grade = gradesList[editIndex];
                 document.getElementById('grade-val').value = grade.note;
+                document.getElementById('grade-weight').value = grade.weight !== undefined ? grade.weight : 1;
                 document.getElementById('grade-pts').value = grade.points || '';
                 document.getElementById('grade-max').value = grade.max || '';
                 document.getElementById('grade-notes').value = grade.notes || '';
             } else {
                 document.getElementById('grade-modal-title').innerText = "Add Grade";
                 document.getElementById('grade-val').value = '';
+                document.getElementById('grade-weight').value = '1';
                 document.getElementById('grade-pts').value = '';
                 document.getElementById('grade-max').value = '';
                 document.getElementById('grade-notes').value = '';
@@ -645,7 +795,7 @@
         }
 
         function renderCustomFieldsInputs(editIndex) {
-            const categoryData = state.subjects[state.currentSubject][state.currentCategory];
+            const categoryData = state.semesters[state.currentSemester][state.currentSubject][state.currentCategory];
             const customFields = categoryData.customFields || [];
             const container = document.getElementById('dynamic-custom-fields');
             
@@ -660,7 +810,6 @@
                 const isPdfPath = typeof existingValue === 'string' && existingValue.startsWith('/uploads/');
                 const textValue = isPdfPath ? '' : (existingValue || '');
                 
-                // FIX: Only try to get the filename if it's actually a PDF path
                 const filename = isPdfPath ? existingValue.split('/').pop() : '';
                 
                 const pdfLabel = isPdfPath ? `<p class="text-xs text-slate-400 mt-2 max-w-[240px] truncate" title="${filename}">Selected PDF: <span class="text-white">${filename}</span></p>` : '';
@@ -687,6 +836,9 @@
             const val = parseFloat(document.getElementById('grade-val').value);
             if(isNaN(val)) return;
 
+            const weightVal = parseFloat(document.getElementById('grade-weight').value);
+            const finalWeight = isNaN(weightVal) ? 1 : weightVal;
+
             const editIndex = parseInt(document.getElementById('grade-edit-index').value);
             
             let customData = {};
@@ -705,6 +857,7 @@
 
             const newGrade = {
                 note: val,
+                weight: finalWeight,
                 points: document.getElementById('grade-pts').value,
                 max: document.getElementById('grade-max').value,
                 notes: document.getElementById('grade-notes').value,
@@ -712,7 +865,7 @@
                 date: new Date().toLocaleDateString()
             };
 
-            const categoryData = state.subjects[state.currentSubject][state.currentCategory];
+            const categoryData = state.semesters[state.currentSemester][state.currentSubject][state.currentCategory];
             let gradesList = Array.isArray(categoryData) ? categoryData : categoryData.grades;
 
             if(editIndex >= 0) {
@@ -728,7 +881,7 @@
 
         function deleteGrade(index) {
             if(confirm("Delete this grade?")) {
-                const categoryData = state.subjects[state.currentSubject][state.currentCategory];
+                const categoryData = state.semesters[state.currentSemester][state.currentSubject][state.currentCategory];
                 let gradesList = Array.isArray(categoryData) ? categoryData : categoryData.grades;
                 gradesList.splice(index, 1);
                 refreshUI();
@@ -736,7 +889,7 @@
         }
         
         function moveGrade(index, direction) {
-            const categoryData = state.subjects[state.currentSubject][state.currentCategory];
+            const categoryData = state.semesters[state.currentSemester][state.currentSubject][state.currentCategory];
             let gradesList = Array.isArray(categoryData) ? categoryData : categoryData.grades;
 
             if (direction === -1 && index > 0) {
@@ -748,63 +901,85 @@
         }
 
         function nextSubject() {
-            const keys = Object.keys(state.subjects);
+            const keys = Object.keys(state.semesters[state.currentSemester]);
             if(keys.length < 2) return;
             const idx = keys.indexOf(state.currentSubject);
             state.currentSubject = keys[(idx + 1) % keys.length];
-            state.currentCategory = Object.keys(state.subjects[state.currentSubject])[0];
+            state.currentCategory = Object.keys(state.semesters[state.currentSemester][state.currentSubject])[0];
+            refreshUI();
+        }
+
+        function prevSubject() {
+            const keys = Object.keys(state.semesters[state.currentSemester]);
+            if(keys.length < 2) return;
+            const idx = keys.indexOf(state.currentSubject);
+            state.currentSubject = keys[(idx - 1 + keys.length) % keys.length];
+            state.currentCategory = Object.keys(state.semesters[state.currentSemester][state.currentSubject])[0];
             refreshUI();
         }
 
         function openDreamModal() {
             if(!state.currentSubject) return alert("Please add a subject first!");
-            // Clear previous results
             document.getElementById('dream-result-box').classList.add('hidden');
             document.getElementById('dream-target').value = '';
             document.getElementById('dream-remaining').value = '1';
+            document.getElementById('dream-future-weight').value = '1';
             openModal('dream-modal');
         }
 
         function calculateDreamGrade() {
             const target = parseFloat(document.getElementById('dream-target').value);
             const remaining = parseInt(document.getElementById('dream-remaining').value);
+            const futureWeightPerExam = parseFloat(document.getElementById('dream-future-weight').value);
             const scope = document.getElementById('dream-scope').value;
 
-            if (isNaN(target) || isNaN(remaining) || remaining <= 0) {
-                return alert("Please enter valid target and exam numbers.");
+            if (isNaN(target) || isNaN(remaining) || remaining <= 0 || isNaN(futureWeightPerExam) || futureWeightPerExam <= 0) {
+                return alert("Please enter valid numbers for target, exams, and weight.");
             }
 
-            let currentGrades = [];
+            let currentWeightedSum = 0;
+            let currentWeightTotal = 0;
 
             if (scope === 'category') {
-                const catData = state.subjects[state.currentSubject][state.currentCategory];
-                currentGrades = (Array.isArray(catData) ? catData : catData.grades).map(g => g.note);
+                const catData = state.semesters[state.currentSemester][state.currentSubject][state.currentCategory];
+                const grades = Array.isArray(catData) ? catData : catData.grades;
+                grades.forEach(g => {
+                    let w = g.weight !== undefined ? g.weight : 1;
+                    currentWeightedSum += (g.note * w);
+                    currentWeightTotal += w;
+                });
             } else if (scope === 'subject') {
-                Object.values(state.subjects[state.currentSubject]).forEach(cat => {
+                Object.values(state.semesters[state.currentSemester][state.currentSubject]).forEach(cat => {
                     const grades = Array.isArray(cat) ? cat : cat.grades;
-                    grades.forEach(g => currentGrades.push(g.note));
+                    grades.forEach(g => {
+                        let w = g.weight !== undefined ? g.weight : 1;
+                        currentWeightedSum += (g.note * w);
+                        currentWeightTotal += w;
+                    });
                 });
             } else if (scope === 'global') {
-                Object.values(state.subjects).forEach(subj => {
-                    Object.values(subj).forEach(cat => {
-                        const grades = Array.isArray(cat) ? cat : cat.grades;
-                        grades.forEach(g => currentGrades.push(g.note));
+                Object.values(state.semesters).forEach(sem => {
+                    Object.values(sem).forEach(subj => {
+                        Object.values(subj).forEach(cat => {
+                            const grades = Array.isArray(cat) ? cat : cat.grades;
+                            grades.forEach(g => {
+                                let w = g.weight !== undefined ? g.weight : 1;
+                                currentWeightedSum += (g.note * w);
+                                currentWeightTotal += w;
+                            });
+                        });
                     });
                 });
             }
 
-            const currentSum = currentGrades.reduce((a, b) => a + b, 0);
-            const currentCount = currentGrades.length;
-            const totalCount = currentCount + remaining;
+            const futureWeightTotal = remaining * futureWeightPerExam; 
+            const totalWeight = currentWeightTotal + futureWeightTotal;
 
-            // 1. Calculate Exact Math
-            const neededExact = (target * totalCount - currentSum) / remaining;
+            const neededExact = (target * totalWeight - currentWeightedSum) / futureWeightTotal;
             
-            // 2. Calculate Rounded Math (Target - 0.25 threshold)
             const minAvgNeeded = target - 0.25;
-            const neededRounded = (minAvgNeeded * totalCount - currentSum) / remaining;
+            const neededRounded = (minAvgNeeded * totalWeight - currentWeightedSum) / futureWeightTotal;
 
-            // Update UI Labels
             const resultBox = document.getElementById('dream-result-box');
             resultBox.classList.remove('hidden');
             
@@ -819,7 +994,6 @@
             resultLabel.innerText = neededExact.toFixed(2);
             roundedLabel.innerText = neededRounded.toFixed(2);
 
-            // Styling for PRIMARY (Rounded Result)
             if (neededRounded > 6.0) {
                 roundedLabel.className = "text-5xl font-bold text-red-400 mt-2";
                 messageLabel.className = "text-xs text-red-400/80 mt-2 italic";
@@ -834,21 +1008,11 @@
                 messageLabel.innerText = "Keep grinding, you've got this!";
             }
 
-            // Styling for SECONDARY (Exact Result)
             if (neededExact > 6.0) {
                 resultLabel.className = "text-lg font-bold text-red-400/60";
             } else {
                 resultLabel.className = "text-lg font-bold text-slate-300";
             }
-        }
-        
-        function prevSubject() {
-            const keys = Object.keys(state.subjects);
-            if(keys.length < 2) return;
-            const idx = keys.indexOf(state.currentSubject);
-            state.currentSubject = keys[(idx - 1 + keys.length) % keys.length];
-            state.currentCategory = Object.keys(state.subjects[state.currentSubject])[0];
-            refreshUI();
         }
 
         function getGradeColorClass(grade) {
@@ -858,8 +1022,36 @@
             return 'grade-danger';
         }
 
+        function renderSemesterTabs() {
+            const container = document.getElementById('semester-tabs-container');
+            let html = '';
+            for(let year = 1; year <= 4; year++) {
+                const semA = (year * 2) - 1;
+                const semB = year * 2;
+                
+                const activeA = state.currentSemester === `Semester ${semA}`;
+                const activeB = state.currentSemester === `Semester ${semB}`;
+                
+                const classA = activeA ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'text-slate-400 hover:bg-slate-700 hover:text-slate-200';
+                const classB = activeB ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'text-slate-400 hover:bg-slate-700 hover:text-slate-200';
+
+                html += `
+                    <div class="flex flex-col gap-1.5 bg-slate-800/40 p-2 rounded-xl border border-slate-700/50 min-w-max">
+                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest text-center">Lehrjahr ${year}</span>
+                        <div class="flex gap-1.5">
+                            <button onclick="changeSemester('Semester ${semA}')" class="px-5 py-1.5 rounded-lg text-sm font-bold transition ${classA}">${semA}</button>
+                            <button onclick="changeSemester('Semester ${semB}')" class="px-5 py-1.5 rounded-lg text-sm font-bold transition ${classB}">${semB}</button>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
         function refreshUI() {
             saveData(); 
+            
+            renderSemesterTabs();
             
             const subjectTitle = document.getElementById('current-subject-title');
             const tabsContainer = document.getElementById('category-tabs');
@@ -868,165 +1060,171 @@
             const subjectAvgLabel = document.getElementById('subject-avg');
             const globalAvgLabel = document.getElementById('global-avg');
 
-            if(!state.currentSubject) {
+            if(!state.currentSubject || !state.semesters[state.currentSemester] || Object.keys(state.semesters[state.currentSemester]).length === 0) {
                 subjectTitle.innerText = "No Subjects Added";
                 tabsContainer.innerHTML = '';
                 thead.innerHTML = '';
-                body.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-500">Add a subject from the sidebar to begin.</td></tr>';
+                body.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-500">Add a subject from the sidebar to begin this semester.</td></tr>';
                 subjectAvgLabel.innerText = "N/A";
                 subjectAvgLabel.className = "text-4xl font-bold tracking-tight text-slate-500";
-                globalAvgLabel.innerText = "0.00";
-                return;
-            }
-
-            subjectTitle.innerText = state.currentSubject;
-            
-            tabsContainer.innerHTML = '';
-            const categories = Object.keys(state.subjects[state.currentSubject]);
-            categories.forEach(cat => {
-                const isActive = state.currentCategory === cat;
-                const btn = document.createElement('button');
-                btn.className = `px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 whitespace-nowrap ${isActive ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`;
+            } else {
+                subjectTitle.innerText = state.currentSubject;
                 
-                if(isActive) btn.innerHTML = `${cat} <span onclick="event.stopPropagation(); deleteCategory();" class="hover:text-red-400 ml-1"><i data-lucide="x" size="14"></i></span>`;
-                else btn.innerText = cat;
+                tabsContainer.innerHTML = '';
+                const categories = Object.keys(state.semesters[state.currentSemester][state.currentSubject]);
+                categories.forEach(cat => {
+                    const isActive = state.currentCategory === cat;
+                    const btn = document.createElement('button');
+                    btn.className = `px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 whitespace-nowrap ${isActive ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`;
+                    
+                    if(isActive) btn.innerHTML = `${cat} <span onclick="event.stopPropagation(); deleteCategory();" class="hover:text-red-400 ml-1"><i data-lucide="x" size="14"></i></span>`;
+                    else btn.innerText = cat;
+                    
+                    btn.onclick = () => { state.currentCategory = cat; refreshUI(); };
+                    tabsContainer.appendChild(btn);
+                });
+
+                if (Array.isArray(state.semesters[state.currentSemester][state.currentSubject][state.currentCategory])) {
+                    state.semesters[state.currentSemester][state.currentSubject][state.currentCategory] = {
+                        grades: state.semesters[state.currentSemester][state.currentSubject][state.currentCategory],
+                        customFields: []
+                    };
+                }
                 
-                btn.onclick = () => { state.currentCategory = cat; refreshUI(); };
-                tabsContainer.appendChild(btn);
-            });
+                const categoryData = state.semesters[state.currentSemester][state.currentSubject][state.currentCategory];
+                if (!categoryData.customFields) categoryData.customFields = [];
+                if (!categoryData.formula) categoryData.formula = 'points * 5 / max + 1';
+                const grades = categoryData.grades || [];
+                const customFields = categoryData.customFields;
 
-            if (Array.isArray(state.subjects[state.currentSubject][state.currentCategory])) {
-                state.subjects[state.currentSubject][state.currentCategory] = {
-                    grades: state.subjects[state.currentSubject][state.currentCategory],
-                    customFields: []
-                };
-            }
-            const categoryData = state.subjects[state.currentSubject][state.currentCategory];
-            if (!categoryData.customFields) categoryData.customFields = [];
-            if (!categoryData.formula) categoryData.formula = 'points * 5 / max + 1';
-            const grades = categoryData.grades || [];
-            const customFields = categoryData.customFields;
-
-            // --- BUILD DYNAMIC HEADERS ---
-            let headerHTML = `
-                <th class="p-4 font-semibold text-slate-300">Grade</th>
-            `;
-            
-            if(categoryData.showCalculatedGrade) {
-                headerHTML += `<th class="p-4 font-semibold text-slate-300">Calculated Grade</th>`;
-            }
-            
-            headerHTML += `
-                <th class="p-4 font-semibold text-slate-300">Points</th>
-                <th class="p-4 font-semibold text-slate-300">Date</th>
-                <th class="p-4 font-semibold text-slate-300">Notes</th>
-            `;
-            
-            customFields
-                .filter(field => field.type !== 'formula')
-                .forEach((field, idx) => {
-                headerHTML += `
-                    <th class="p-4 font-semibold text-slate-300 whitespace-nowrap group">
-                        <div class="flex items-center gap-2">
-                            ${field.name}
-                            <div class="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
-                                <button onclick="moveColumn(${idx}, -1)" class="text-slate-500 hover:text-white" title="Move Left"><i data-lucide="chevron-left" size="14"></i></button>
-                                <button onclick="moveColumn(${idx}, 1)" class="text-slate-500 hover:text-white" title="Move Right"><i data-lucide="chevron-right" size="14"></i></button>
-                            </div>
-                        </div>
-                    </th>
+                let headerHTML = `
+                    <th class="p-4 font-semibold text-slate-300">Grade</th>
                 `;
-            });
-            headerHTML += `<th class="p-4 font-semibold text-slate-300 text-right">Actions</th>`;
-            thead.innerHTML = headerHTML;
-
-            // --- BUILD DYNAMIC ROWS ---
-            body.innerHTML = '';
-            if(grades.length === 0) {
-                body.innerHTML = `<tr><td colspan="${(categoryData.showCalculatedGrade ? 1 : 0) + 5 + customFields.filter(f => f.type !== 'formula').length}" class="p-8 text-center text-slate-500 border-none">No grades in this category.</td></tr>`;
-            } else {
-                grades.forEach((g, i) => {
-                    const colorClass = getGradeColorClass(g.note);
-                    const pts = g.points ? `${g.points}${g.max ? ` / ${g.max}` : ''}` : '-';
-                    
-                    let customFieldsHTML = '';
-                    customFields
-                        .filter(field => field.type !== 'formula')
-                        .forEach(field => {
-                        let value = (g.custom && g.custom[field.name]) ? g.custom[field.name] : '';
-                        let displayVal = value;
-                        
-                        if (field.type === 'formula') {
-                            const formula = categoryData.formula || 'points * 5 / max + 1';
-                            const computed = evaluateGradeFormula(formula, g.points, g.max);
-                            displayVal = `<span class="text-slate-200 font-medium">${computed}</span>`;
-                        } else if (typeof value === 'string' && value.startsWith('/uploads/')) {
-                            const filename = value.split('/').pop();
-                            displayVal = `<a href="${value}" target="_blank" title="${filename}" class="text-blue-400 hover:underline flex items-center gap-1 max-w-[180px] truncate"><i data-lucide="file-text" size="14"></i> ${filename}</a>`;
-                        } else if (/^https?:\/\//i.test(value)) {
-                            displayVal = `<a href="${value}" target="_blank" class="text-blue-400 hover:underline flex items-center gap-1 w-fit"><i data-lucide="external-link" size="14"></i> Link</a>`;
-                        } else if (value) {
-                            displayVal = `<span class="max-w-[150px] truncate block" title="${value}">${value}</span>`;
-                        } else {
-                            displayVal = '-';
-                        }
-                        
-                        customFieldsHTML += `<td class="p-4 text-slate-300">${displayVal}</td>`;
-                    });
-                    
-                    const row = `
-                        <tr class="hover:bg-slate-800/30 transition group">
-                            <td class="p-4 font-bold text-lg ${colorClass}">${g.note.toFixed(2)}</td>
-                            ${categoryData.showCalculatedGrade ? `<td class="p-4 text-slate-200 font-medium">${evaluateGradeFormula(categoryData.formula || 'points * 5 / max + 1', g.points, g.max)}</td>` : ''}
-                            <td class="p-4 text-slate-400 whitespace-nowrap">${pts}</td>
-                            <td class="p-4 text-slate-400 whitespace-nowrap">${g.date}</td>
-                            <td class="p-4 text-slate-300 max-w-[200px] truncate" title="${g.notes || ''}">${g.notes || '-'}</td>
-                            ${customFieldsHTML}
-                            <td class="p-4 text-right flex justify-end items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onclick="moveGrade(${i}, -1)" class="text-slate-500 hover:text-white p-1 rounded transition" title="Move Up"><i data-lucide="arrow-up" size="16"></i></button>
-                                <button onclick="moveGrade(${i}, 1)" class="text-slate-500 hover:text-white p-1 rounded transition mr-2" title="Move Down"><i data-lucide="arrow-down" size="16"></i></button>
-                                
-                                <button onclick="openGradeModal(${i})" class="text-slate-400 hover:text-blue-400 p-2 rounded-md hover:bg-blue-400/10 transition"><i data-lucide="edit-2" size="16"></i></button>
-                                <button onclick="deleteGrade(${i})" class="text-slate-400 hover:text-red-400 p-2 rounded-md hover:bg-red-400/10 transition"><i data-lucide="trash-2" size="16"></i></button>
-                            </td>
-                        </tr>
+                
+                if(categoryData.showCalculatedGrade) {
+                    headerHTML += `<th class="p-4 font-semibold text-slate-300">Calculated Grade</th>`;
+                }
+                
+                headerHTML += `
+                    <th class="p-4 font-semibold text-slate-300">Weight</th>
+                    <th class="p-4 font-semibold text-slate-300">Points</th>
+                    <th class="p-4 font-semibold text-slate-300">Date</th>
+                    <th class="p-4 font-semibold text-slate-300">Notes</th>
+                `;
+                
+                customFields
+                    .filter(field => field.type !== 'formula')
+                    .forEach((field, idx) => {
+                    headerHTML += `
+                        <th class="p-4 font-semibold text-slate-300 whitespace-nowrap group">
+                            <div class="flex items-center gap-2">
+                                ${field.name}
+                                <div class="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
+                                    <button onclick="moveColumn(${idx}, -1)" class="text-slate-500 hover:text-white" title="Move Left"><i data-lucide="chevron-left" size="14"></i></button>
+                                    <button onclick="moveColumn(${idx}, 1)" class="text-slate-500 hover:text-white" title="Move Right"><i data-lucide="chevron-right" size="14"></i></button>
+                                </div>
+                            </div>
+                        </th>
                     `;
-                    body.innerHTML += row;
                 });
-            }
+                headerHTML += `<th class="p-4 font-semibold text-slate-300 text-right">Actions</th>`;
+                thead.innerHTML = headerHTML;
 
-            let subjTotal = 0, subjCount = 0;
-            categories.forEach(cat => {
-                let catData = state.subjects[state.currentSubject][cat];
-                let catGrades = Array.isArray(catData) ? catData : (catData.grades || []);
-                catGrades.forEach(g => {
-                    subjTotal += g.note;
-                    subjCount++;
-                });
-            });
+                body.innerHTML = '';
+                if(grades.length === 0) {
+                    body.innerHTML = `<tr><td colspan="${(categoryData.showCalculatedGrade ? 1 : 0) + 6 + customFields.filter(f => f.type !== 'formula').length}" class="p-8 text-center text-slate-500 border-none">No grades in this category.</td></tr>`;
+                } else {
+                    grades.forEach((g, i) => {
+                        const colorClass = getGradeColorClass(g.note);
+                        const weightVal = g.weight !== undefined ? g.weight : 1;
+                        const pts = g.points ? `${g.points}${g.max ? ` / ${g.max}` : ''}` : '-';
+                        
+                        let customFieldsHTML = '';
+                        customFields
+                            .filter(field => field.type !== 'formula')
+                            .forEach(field => {
+                            let value = (g.custom && g.custom[field.name]) ? g.custom[field.name] : '';
+                            let displayVal = value;
+                            
+                            if (field.type === 'formula') {
+                                const formula = categoryData.formula || 'points * 5 / max + 1';
+                                const computed = evaluateGradeFormula(formula, g.points, g.max);
+                                displayVal = `<span class="text-slate-200 font-medium">${computed}</span>`;
+                            } else if (typeof value === 'string' && value.startsWith('/uploads/')) {
+                                const filename = value.split('/').pop();
+                                displayVal = `<a href="${value}" target="_blank" title="${filename}" class="text-blue-400 hover:underline flex items-center gap-1 max-w-[180px] truncate"><i data-lucide="file-text" size="14"></i> ${filename}</a>`;
+                            } else if (/^https?:\/\//i.test(value)) {
+                                displayVal = `<a href="${value}" target="_blank" class="text-blue-400 hover:underline flex items-center gap-1 w-fit"><i data-lucide="external-link" size="14"></i> Link</a>`;
+                            } else if (value) {
+                                displayVal = `<span class="max-w-[150px] truncate block" title="${value}">${value}</span>`;
+                            } else {
+                                displayVal = '-';
+                            }
+                            
+                            customFieldsHTML += `<td class="p-4 text-slate-300">${displayVal}</td>`;
+                        });
+                        
+                        const row = `
+                            <tr class="hover:bg-slate-800/30 transition group">
+                                <td class="p-4 font-bold text-lg ${colorClass}">${g.note.toFixed(2)}</td>
+                                ${categoryData.showCalculatedGrade ? `<td class="p-4 text-slate-200 font-medium">${evaluateGradeFormula(categoryData.formula || 'points * 5 / max + 1', g.points, g.max)}</td>` : ''}
+                                <td class="p-4 text-slate-400 whitespace-nowrap">${weightVal}x</td>
+                                <td class="p-4 text-slate-400 whitespace-nowrap">${pts}</td>
+                                <td class="p-4 text-slate-400 whitespace-nowrap">${g.date}</td>
+                                <td class="p-4 text-slate-300 max-w-[200px] truncate" title="${g.notes || ''}">${g.notes || '-'}</td>
+                                ${customFieldsHTML}
+                                <td class="p-4 text-right flex justify-end items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onclick="moveGrade(${i}, -1)" class="text-slate-500 hover:text-white p-1 rounded transition" title="Move Up"><i data-lucide="arrow-up" size="16"></i></button>
+                                    <button onclick="moveGrade(${i}, 1)" class="text-slate-500 hover:text-white p-1 rounded transition mr-2" title="Move Down"><i data-lucide="arrow-down" size="16"></i></button>
+                                    
+                                    <button onclick="openGradeModal(${i})" class="text-slate-400 hover:text-blue-400 p-2 rounded-md hover:bg-blue-400/10 transition"><i data-lucide="edit-2" size="16"></i></button>
+                                    <button onclick="deleteGrade(${i})" class="text-slate-400 hover:text-red-400 p-2 rounded-md hover:bg-red-400/10 transition"><i data-lucide="trash-2" size="16"></i></button>
+                                </td>
+                            </tr>
+                        `;
+                        body.innerHTML += row;
+                    });
+                }
 
-            if(subjCount > 0) {
-                const avg = subjTotal / subjCount;
-                subjectAvgLabel.innerText = avg.toFixed(2);
-                subjectAvgLabel.className = `text-4xl font-bold tracking-tight ${getGradeColorClass(avg)}`;
-            } else {
-                subjectAvgLabel.innerText = "N/A";
-                subjectAvgLabel.className = "text-4xl font-bold tracking-tight text-slate-500";
-            }
-
-            let globalTotal = 0, globalCount = 0;
-            Object.values(state.subjects).forEach(subject => {
-                Object.values(subject).forEach(catData => {
+                // Subject Average
+                let subjTotal = 0, subjWeightCount = 0;
+                categories.forEach(cat => {
+                    let catData = state.semesters[state.currentSemester][state.currentSubject][cat];
                     let catGrades = Array.isArray(catData) ? catData : (catData.grades || []);
                     catGrades.forEach(g => {
-                        globalTotal += g.note;
-                        globalCount++;
+                        let w = g.weight !== undefined ? g.weight : 1;
+                        subjTotal += (g.note * w);
+                        subjWeightCount += w;
+                    });
+                });
+
+                if(subjWeightCount > 0) {
+                    const avg = subjTotal / subjWeightCount;
+                    subjectAvgLabel.innerText = avg.toFixed(2);
+                    subjectAvgLabel.className = `text-4xl font-bold tracking-tight ${getGradeColorClass(avg)}`;
+                } else {
+                    subjectAvgLabel.innerText = "N/A";
+                    subjectAvgLabel.className = "text-4xl font-bold tracking-tight text-slate-500";
+                }
+            }
+
+            // Global Average (Across all semesters and subjects)
+            let globalTotal = 0, globalWeightCount = 0;
+            Object.values(state.semesters).forEach(sem => {
+                Object.values(sem).forEach(subject => {
+                    Object.values(subject).forEach(catData => {
+                        let catGrades = Array.isArray(catData) ? catData : (catData.grades || []);
+                        catGrades.forEach(g => {
+                            let w = g.weight !== undefined ? g.weight : 1;
+                            globalTotal += (g.note * w);
+                            globalWeightCount += w;
+                        });
                     });
                 });
             });
 
-            if(globalCount > 0) {
-                const globalAvg = globalTotal / globalCount;
+            if(globalWeightCount > 0) {
+                const globalAvg = globalTotal / globalWeightCount;
                 globalAvgLabel.innerText = globalAvg.toFixed(2);
                 globalAvgLabel.className = `text-3xl font-bold ${getGradeColorClass(globalAvg)}`;
             } else {
