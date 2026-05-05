@@ -10,25 +10,21 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f8fafc; }
         
-        /* Modern Glass Effect */
         .glass { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
         .glass-panel { background: linear-gradient(145deg, rgba(30,41,59,0.8) 0%, rgba(15,23,42,0.8) 100%); border: 1px solid rgba(255, 255, 255, 0.05); }
         
-        /* Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
 
-        /* Animations */
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
         
-        /* Grade Colors */
-        .grade-excellent { color: #10b981; } /* Green */
-        .grade-good { color: #3b82f6; }      /* Blue */
-        .grade-warning { color: #f59e0b; }   /* Yellow */
-        .grade-danger { color: #ef4444; }    /* Red */
+        .grade-excellent { color: #10b981; }
+        .grade-good { color: #3b82f6; }     
+        .grade-warning { color: #f59e0b; }  
+        .grade-danger { color: #ef4444; }   
     </style>
 </head>
 <body class="min-h-screen overflow-hidden selection:bg-blue-500/30">
@@ -54,16 +50,27 @@
                             <input type="text" id="username" class="w-full pl-10 p-3 rounded-xl bg-slate-900/50 border border-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition" placeholder="student_name">
                         </div>
                     </div>
-                    <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2">
-                        Enter Dashboard <i data-lucide="arrow-right" size="18"></i>
-                    </button>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Password</label>
+                        <div class="relative">
+                            <i data-lucide="lock" class="absolute left-3 top-3 text-slate-500" size="20"></i>
+                            <input type="password" id="password" class="w-full pl-10 p-3 rounded-xl bg-slate-900/50 border border-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition" placeholder="••••••••">
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <button onclick="login()" class="flex-1 bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2">
+                            Login
+                        </button>
+                        <button onclick="register()" class="flex-1 bg-slate-700 hover:bg-slate-600 py-3 rounded-xl font-bold transition flex items-center justify-center gap-2">
+                            Register
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="app-screen" class="hidden flex h-screen w-full animate-fade-in">
-        
         <aside class="w-72 glass-panel flex flex-col border-r border-slate-800 relative z-20">
             <div class="p-6 border-b border-slate-800 flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center shadow-lg">
@@ -102,7 +109,6 @@
         </aside>
 
         <main class="flex-1 flex flex-col h-full bg-[#0b0f19] relative">
-            
             <header class="p-8 pb-4 flex justify-between items-end">
                 <div>
                     <div class="flex items-center gap-4 mb-2">
@@ -119,10 +125,8 @@
             </header>
 
             <div class="p-8 pt-4 flex-1 flex flex-col overflow-hidden">
-                
                 <div class="flex flex-wrap items-center justify-between gap-4 mb-6 p-4 glass rounded-2xl">
-                    <div id="category-tabs" class="flex gap-2 overflow-x-auto custom-scrollbar pb-1">
-                        </div>
+                    <div id="category-tabs" class="flex gap-2 overflow-x-auto custom-scrollbar pb-1"></div>
                     <div class="flex gap-3">
                         <button onclick="openModal('category-modal')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sm font-medium rounded-lg transition flex items-center gap-2">
                             <i data-lucide="folder-plus" size="16"></i> Category
@@ -145,8 +149,7 @@
                                     <th class="p-4 font-semibold text-slate-300 text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="grades-body" class="divide-y divide-slate-800/50">
-                                </tbody>
+                            <tbody id="grades-body" class="divide-y divide-slate-800/50"></tbody>
                         </table>
                     </div>
                 </div>
@@ -155,7 +158,6 @@
     </div>
 
     <div id="modal-backdrop" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex justify-center items-center opacity-0 transition-opacity duration-300">
-        
         <div id="subject-modal" class="hidden bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-sm shadow-2xl transform scale-95 transition-transform duration-300">
             <h3 class="text-xl font-bold mb-4">Add New Subject</h3>
             <input type="text" id="subject-input" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 mb-6 focus:border-blue-500 outline-none" placeholder="e.g., Mathematics">
@@ -204,11 +206,9 @@
                 <button onclick="saveGrade()" class="flex-1 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition">Save Grade</button>
             </div>
         </div>
-
     </div>
 
     <script>
-        // --- STATE MANAGEMENT ---
         let state = {
             user: null,
             subjects: {}, 
@@ -216,49 +216,99 @@
             currentCategory: 'General'
         };
 
-        // --- CORE FUNCTIONS ---
-        function login() {
+        // --- AUTH API ---
+        async function register() {
             const user = document.getElementById('username').value.trim();
-            if(!user) return;
-            
-            state.user = user;
-            const savedData = localStorage.getItem(`pygrade_pro_${user}`);
-            state.subjects = savedData ? JSON.parse(savedData) : {};
-            
-            const subjectKeys = Object.keys(state.subjects);
-            state.currentSubject = subjectKeys.length > 0 ? subjectKeys[0] : null;
-            
-            // Transition UI
-            document.getElementById('login-screen').classList.add('opacity-0', 'pointer-events-none');
-            setTimeout(() => {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app-screen').classList.remove('hidden');
-                document.getElementById('display-user').innerText = `@${user}`;
-                refreshUI();
-            }, 500);
+            const pass = document.getElementById('password').value;
+            if(!user || !pass) return alert("Enter both username and password to register.");
+
+            try {
+                const res = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user, password: pass })
+                });
+                
+                if(res.ok) {
+                    alert("Registration successful! You can now log in.");
+                } else {
+                    const data = await res.json();
+                    alert(data.error || "Registration failed");
+                }
+            } catch(e) {
+                alert("Server error. Is the Flask server running?");
+            }
         }
 
-        function logout() {
-            saveData();
+        async function login() {
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value;
+            if(!user || !pass) return alert("Enter username and password.");
+            
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user, password: pass })
+                });
+
+                if(res.ok) {
+                    state.user = user;
+                    
+                    // Fetch data from Python Server
+                    const dataRes = await fetch('/api/data');
+                    const dataJson = await dataRes.json();
+                    state.subjects = dataJson.subjects || {};
+                    
+                    const subjectKeys = Object.keys(state.subjects);
+                    state.currentSubject = subjectKeys.length > 0 ? subjectKeys[0] : null;
+                    if(state.currentSubject) {
+                        state.currentCategory = Object.keys(state.subjects[state.currentSubject])[0] || 'General';
+                    }
+                    
+                    document.getElementById('login-screen').classList.add('opacity-0', 'pointer-events-none');
+                    setTimeout(() => {
+                        document.getElementById('login-screen').classList.add('hidden');
+                        document.getElementById('app-screen').classList.remove('hidden');
+                        document.getElementById('display-user').innerText = `@${user}`;
+                        refreshUI();
+                    }, 500);
+                } else {
+                    const data = await res.json();
+                    alert(data.error || "Login failed");
+                }
+            } catch(e) {
+                alert("Server error. Is the Flask server running?");
+            }
+        }
+
+        async function logout() {
+            await fetch('/api/logout', { method: 'POST' });
             location.reload();
         }
 
-        function saveData() {
-            if(state.user) localStorage.setItem(`pygrade_pro_${state.user}`, JSON.stringify(state.subjects));
+        // --- DATA SAVING API ---
+        async function saveData() {
+            if(state.user) {
+                try {
+                    await fetch('/api/data', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ subjects: state.subjects })
+                    });
+                } catch(e) {
+                    console.error("Failed to save to database", e);
+                }
+            }
         }
 
         // --- MODAL CONTROLLERS ---
         function openModal(id) {
             const backdrop = document.getElementById('modal-backdrop');
             const target = document.getElementById(id);
-            
-            // Hide all modals first
             ['subject-modal', 'category-modal', 'grade-modal'].forEach(m => document.getElementById(m).classList.add('hidden'));
-            
             backdrop.classList.remove('hidden');
             target.classList.remove('hidden');
-            
-            // Trigger animations
             setTimeout(() => {
                 backdrop.classList.remove('opacity-0');
                 target.classList.remove('scale-95');
@@ -269,12 +319,9 @@
         function closeModals() {
             const backdrop = document.getElementById('modal-backdrop');
             backdrop.classList.add('opacity-0');
-            
-            // Reset transforms
             ['subject-modal', 'category-modal', 'grade-modal'].forEach(m => {
                 document.getElementById(m).classList.replace('scale-100', 'scale-95');
             });
-
             setTimeout(() => { backdrop.classList.add('hidden'); }, 300);
         }
 
@@ -305,7 +352,6 @@
 
         function openGradeModal(editIndex = -1) {
             if(!state.currentSubject) return alert("Please create a subject first.");
-            
             document.getElementById('grade-edit-index').value = editIndex;
             
             if(editIndex >= 0) {
@@ -339,7 +385,6 @@
             };
 
             if(editIndex >= 0) {
-                // Preserve original date if editing
                 newGrade.date = state.subjects[state.currentSubject][state.currentCategory][editIndex].date;
                 state.subjects[state.currentSubject][state.currentCategory][editIndex] = newGrade;
             } else {
@@ -377,7 +422,6 @@
         }
 
         function getGradeColorClass(grade) {
-            // Assuming higher is better (Swiss System: 6=Best, 4=Pass)
             if(grade >= 5.5) return 'grade-excellent';
             if(grade >= 4.5) return 'grade-good';
             if(grade >= 4.0) return 'grade-warning';
@@ -385,7 +429,7 @@
         }
 
         function refreshUI() {
-            saveData();
+            saveData(); // <--- This now saves directly to your Python backend!
             
             const subjectTitle = document.getElementById('current-subject-title');
             const tabsContainer = document.getElementById('category-tabs');
@@ -405,7 +449,6 @@
 
             subjectTitle.innerText = state.currentSubject;
             
-            // Render Tabs
             tabsContainer.innerHTML = '';
             const categories = Object.keys(state.subjects[state.currentSubject]);
             categories.forEach(cat => {
@@ -417,7 +460,6 @@
                 tabsContainer.appendChild(btn);
             });
 
-            // Render Grades Table
             body.innerHTML = '';
             const grades = state.subjects[state.currentSubject][state.currentCategory] || [];
             
@@ -444,7 +486,6 @@
                 });
             }
 
-            // Calculate Subject Average (combining all categories in the subject)
             let subjTotal = 0, subjCount = 0;
             categories.forEach(cat => {
                 state.subjects[state.currentSubject][cat].forEach(g => {
@@ -462,7 +503,6 @@
                 subjectAvgLabel.className = "text-4xl font-bold tracking-tight text-slate-500";
             }
 
-            // Calculate Global Average
             let globalTotal = 0, globalCount = 0;
             Object.values(state.subjects).forEach(subject => {
                 Object.values(subject).forEach(catGrades => {
@@ -485,7 +525,6 @@
             lucide.createIcons();
         }
 
-        // Initialize icons on load
         lucide.createIcons();
     </script>
 </body>
