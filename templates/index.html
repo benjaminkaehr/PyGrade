@@ -11,6 +11,42 @@
 </head>
 <body class="min-h-screen overflow-hidden selection:bg-blue-500/30">
 
+    <div id="datenschutz-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-[100] hidden flex justify-center items-center opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-900 border border-slate-700 p-8 rounded-2xl w-full max-w-lg shadow-2xl transform scale-95 transition-transform duration-300" id="ds-modal-content">
+            <div class="flex items-center gap-3 mb-4 text-blue-400">
+                <i data-lucide="shield-check" size="28"></i>
+                <h3 class="text-2xl font-bold text-white">Datenschutz & Cookies</h3>
+            </div>
+            
+            <div class="text-slate-300 text-sm space-y-4 mb-8 max-h-64 overflow-y-auto custom-scrollbar pr-2 border-y border-slate-700/50 py-4">
+                <p>Willkommen bei PyGrade Pro! Der Schutz deiner Daten ist uns wichtig. Um diese App nutzen zu können, musst du verstehen, welche Daten wir erheben und wofür wir sie nutzen.</p>
+                
+                <div>
+                    <strong class="text-white block mb-1">1. Welche Daten wir speichern:</strong>
+                    <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                        <li>Deinen Benutzernamen und ein sicher verschlüsseltes Passwort.</li>
+                        <li>Deine eingegebenen Fächer, Noten, Ziele und Notizen.</li>
+                        <li>Von dir hochgeladene Dateien (z.B. Prüfungs-PDFs).</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <strong class="text-white block mb-1">2. Wo liegen die Daten?</strong>
+                    <p class="text-slate-400">Alle Daten werden sicher auf unseren Servern gespeichert. Wir verkaufen deine Daten niemals an Dritte und nutzen sie ausschließlich, um dir diesen Dienst zur Verfügung zu stellen.</p>
+                </div>
+
+                <div>
+                    <strong class="text-white block mb-1">3. Cookies (Technisch notwendig):</strong>
+                    <p class="text-slate-400">Wir verzichten komplett auf Tracking-Cookies oder Werbe-Tracker. Wir nutzen lediglich einen sogenannten "Session-Cookie". Dieser ist technisch zwingend notwendig, damit unser Server dich wiedererkennt, während du eingeloggt bist.</p>
+                </div>
+            </div>
+
+            <button onclick="acceptDatenschutz()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl transition font-bold text-white shadow-lg shadow-blue-500/25 flex justify-center items-center gap-2">
+                <i data-lucide="check" size="18"></i> Ich habe verstanden und stimme zu
+            </button>
+        </div>
+    </div>
+
     <div id="login-screen" class="flex h-screen w-full relative z-10 transition-opacity duration-500">
         <div class="w-full flex flex-col justify-center items-center p-8 relative overflow-hidden">
             <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-600/20 rounded-full blur-3xl"></div>
@@ -83,11 +119,11 @@
                         <button onclick="openModal('custom-fields-modal')" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
                             <i data-lucide="columns" size="18"></i> Edit Columns
                         </button>
-                        <button onclick="openModal('subject-modal')" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
-                            <i data-lucide="plus-circle" size="18"></i> Add Subject
-                        </button>
                         <button onclick="openDreamModal()" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
                             <i data-lucide="sparkles" size="18"></i> Dream Grade
+                        </button>
+                        <button onclick="openModal('subject-modal')" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
+                            <i data-lucide="plus-circle" size="18"></i> Add Subject
                         </button>
                     </div>
                 </div>
@@ -313,6 +349,37 @@
             currentSubject: null,
             currentCategory: 'General'
         };
+
+        // --- DATENSCHUTZ LOGIK ---
+        document.addEventListener("DOMContentLoaded", () => {
+            // Prüfe, ob der User schon zugestimmt hat
+            if (!localStorage.getItem('datenschutz_agreed')) {
+                const dsModal = document.getElementById('datenschutz-modal');
+                const dsContent = document.getElementById('ds-modal-content');
+                
+                dsModal.classList.remove('hidden');
+                // Kurzer Delay für die Fade-In Animation
+                setTimeout(() => {
+                    dsModal.classList.remove('opacity-0');
+                    dsContent.classList.replace('scale-95', 'scale-100');
+                }, 10);
+            }
+        });
+
+        function acceptDatenschutz() {
+            // Speichere die Zustimmung lokal im Browser
+            localStorage.setItem('datenschutz_agreed', 'true');
+            
+            const dsModal = document.getElementById('datenschutz-modal');
+            const dsContent = document.getElementById('ds-modal-content');
+            
+            dsModal.classList.add('opacity-0');
+            dsContent.classList.replace('scale-100', 'scale-95');
+            
+            setTimeout(() => {
+                dsModal.classList.add('hidden');
+            }, 300);
+        }
 
         // --- Auto-Login & Data Migration ---
         window.onload = async () => {
