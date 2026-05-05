@@ -719,7 +719,6 @@
             saveData();
             refreshUI();
         }
-
         // --- MODALS ---
         function openModal(id) {
             if(id === 'custom-fields-modal' && !state.currentSubject) {
@@ -729,8 +728,10 @@
             const backdrop = document.getElementById('modal-backdrop');
             const target = document.getElementById(id);
             
-            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal', 'dream-modal', 'report-card-modal'].forEach(m => {
-                document.getElementById(m).classList.add('hidden');
+            // FIX: Added 'settings-modal' to this list so it hides properly!
+            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal', 'dream-modal', 'report-card-modal', 'settings-modal'].forEach(m => {
+                const el = document.getElementById(m);
+                if (el) el.classList.add('hidden');
             });
 
             backdrop.classList.remove('hidden');
@@ -753,9 +754,13 @@
         function closeModals() {
             const backdrop = document.getElementById('modal-backdrop');
             backdrop.classList.add('opacity-0');
-            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal', 'dream-modal', 'report-card-modal'].forEach(m => {
-                document.getElementById(m).classList.replace('scale-100', 'scale-95');
+            
+            // FIX: Added 'settings-modal' here too!
+            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal', 'dream-modal', 'report-card-modal', 'settings-modal'].forEach(m => {
+                const el = document.getElementById(m);
+                if (el) el.classList.replace('scale-100', 'scale-95');
             });
+            
             setTimeout(() => { backdrop.classList.add('hidden'); }, 300);
         }
 
