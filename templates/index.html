@@ -6,26 +6,8 @@
     <title>PyGrade Web Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f8fafc; }
-        
-        .glass { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .glass-panel { background: linear-gradient(145deg, rgba(30,41,59,0.8) 0%, rgba(15,23,42,0.8) 100%); border: 1px solid rgba(255, 255, 255, 0.05); }
-        
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        
-        .grade-excellent { color: #10b981; }
-        .grade-good { color: #3b82f6; }     
-        .grade-warning { color: #f59e0b; }  
-        .grade-danger { color: #ef4444; }   
-    </style>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="min-h-screen overflow-hidden selection:bg-blue-500/30">
 
@@ -101,11 +83,11 @@
                         <button onclick="openModal('custom-fields-modal')" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
                             <i data-lucide="columns" size="18"></i> Edit Columns
                         </button>
-                        <button onclick="openDreamModal()" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
-                            <i data-lucide="sparkles" size="18"></i> Dream Grade
-                        </button>
                         <button onclick="openModal('subject-modal')" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
                             <i data-lucide="plus-circle" size="18"></i> Add Subject
+                        </button>
+                        <button onclick="openDreamModal()" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
+                            <i data-lucide="sparkles" size="18"></i> Dream Grade
                         </button>
                     </div>
                 </div>
