@@ -1292,11 +1292,18 @@
                                 const formula = categoryData.formula || 'points * 5 / max + 1';
                                 const computed = evaluateGradeFormula(formula, g.points, g.max);
                                 displayVal = `<span class="text-slate-200 font-medium">${computed}</span>`;
-                            } else if (typeof value === 'string' && value.startsWith('/uploads/')) {
-                                const filename = value.split('/').pop();
-                                displayVal = `<a href="${value}" target="_blank" title="${filename}" class="text-blue-400 hover:underline flex items-center gap-1 max-w-[180px] truncate"><i data-lucide="file-text" size="14"></i> ${filename}</a>`;
-                            } else if (/^https?:\/\//i.test(value)) {
-                                displayVal = `<a href="${value}" target="_blank" class="text-blue-400 hover:underline flex items-center gap-1 w-fit"><i data-lucide="external-link" size="14"></i> Link</a>`;
+                            } 
+                            // ROBUST PDF DETECTION: Checks for /uploads/, .pdf, or the unique ID pattern
+                            else if (typeof value === 'string' && (value.includes('/uploads/') || value.match(/^[0-9]+_[a-f0-9]+_/i) || value.toLowerCase().endsWith('.pdf'))) {
+                                // Ensure the link works even if the database is missing the /uploads/ prefix
+                                let href = value.startsWith('/') || value.startsWith('http') ? value : `/uploads/${value}`;
+                                let filename = value.split('/').pop();
+                                
+                                // YOUR BEAUTIFUL BUTTON IS BACK
+                                displayVal = `<a href="${href}" target="_blank" title="${filename}" class="px-3 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg transition flex items-center gap-2 w-fit max-w-[180px]"><i data-lucide="file-text" size="14"></i><span class="truncate">View PDF</span></a>`;
+                            } 
+                            else if (/^https?:\/\//i.test(value)) {
+                                displayVal = `<a href="${value}" target="_blank" class="px-3 py-1.5 bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600 rounded-lg transition flex items-center gap-2 w-fit"><i data-lucide="external-link" size="14"></i> Link</a>`;
                             } else if (value) {
                                 displayVal = `<span class="max-w-[150px] truncate block" title="${value}">${value}</span>`;
                             } else {
