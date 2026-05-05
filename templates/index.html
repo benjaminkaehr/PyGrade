@@ -71,7 +71,7 @@
     </div>
 
     <div id="app-screen" class="hidden flex h-screen w-full animate-fade-in">
-        <aside class="w-72 glass-panel flex flex-col border-r border-slate-800 relative z-20">
+        <aside class="w-72 glass-panel flex flex-col border-r border-slate-800 relative z-20 shrink-0">
             <div class="p-6 border-b border-slate-800 flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center shadow-lg">
                     <i data-lucide="graduation-cap" class="text-white" size="20"></i>
@@ -108,17 +108,16 @@
             </div>
         </aside>
 
-        <main class="flex-1 flex flex-col h-full bg-[#0b0f19] relative">
-            <header class="p-8 pb-4 flex justify-between items-end">
+        <main class="flex-1 flex flex-col h-full bg-[#0b0f19] relative overflow-hidden">
+            <header class="p-8 pb-4 flex justify-between items-end shrink-0">
                 <div>
                     <div class="flex items-center gap-4 mb-2">
                         <button onclick="prevSubject()" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition"><i data-lucide="chevron-left" size="20"></i></button>
                         <h2 id="current-subject-title" class="text-3xl font-bold tracking-tight">No Subjects</h2>
                         <button onclick="nextSubject()" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition"><i data-lucide="chevron-right" size="20"></i></button>
-                        <!-- NEW: Delete Subject Button -->
                         <button onclick="deleteSubject()" class="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition ml-2" title="Delete Subject"><i data-lucide="trash-2" size="20"></i></button>
                     </div>
-                    <p class="text-slate-400 text-sm">Manage your categories and grades below.</p>
+                    <p class="text-slate-400 text-sm">Manage your categories and custom columns below.</p>
                 </div>
                 <div class="text-right">
                     <p class="text-sm text-slate-400 font-medium">Subject Average</p>
@@ -127,9 +126,12 @@
             </header>
 
             <div class="p-8 pt-4 flex-1 flex flex-col overflow-hidden">
-                <div class="flex flex-wrap items-center justify-between gap-4 mb-6 p-4 glass rounded-2xl">
-                    <div id="category-tabs" class="flex gap-2 overflow-x-auto custom-scrollbar pb-1"></div>
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6 p-4 glass rounded-2xl shrink-0">
+                    <div id="category-tabs" class="flex gap-2 overflow-x-auto custom-scrollbar pb-1 flex-1"></div>
                     <div class="flex gap-3">
+                        <button onclick="openModal('custom-fields-modal')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sm font-medium rounded-lg transition flex items-center gap-2">
+                            <i data-lucide="columns" size="16"></i> Edit Columns
+                        </button>
                         <button onclick="openModal('category-modal')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sm font-medium rounded-lg transition flex items-center gap-2">
                             <i data-lucide="folder-plus" size="16"></i> Category
                         </button>
@@ -140,18 +142,14 @@
                 </div>
 
                 <div class="flex-1 glass rounded-2xl overflow-hidden flex flex-col">
-                    <div class="overflow-y-auto custom-scrollbar flex-1">
-                        <table class="w-full text-left text-sm">
+                    <div class="overflow-auto custom-scrollbar flex-1">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
                             <thead class="bg-slate-900/80 sticky top-0 backdrop-blur-md z-10 border-b border-slate-700">
-                                <tr>
-                                    <th class="p-4 font-semibold text-slate-300">Grade</th>
-                                    <th class="p-4 font-semibold text-slate-300">Points</th>
-                                    <th class="p-4 font-semibold text-slate-300">Date</th>
-                                    <th class="p-4 font-semibold text-slate-300 w-1/3">Notes</th>
-                                    <th class="p-4 font-semibold text-slate-300 text-right">Actions</th>
-                                </tr>
+                                <tr id="table-header">
+                                    </tr>
                             </thead>
-                            <tbody id="grades-body" class="divide-y divide-slate-800/50"></tbody>
+                            <tbody id="grades-body" class="divide-y divide-slate-800/50">
+                                </tbody>
                         </table>
                     </div>
                 </div>
@@ -178,34 +176,53 @@
             </div>
         </div>
 
-        <div id="grade-modal" class="hidden bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-300">
-            <h3 id="grade-modal-title" class="text-xl font-bold mb-4">Add Grade</h3>
+        <div id="grade-modal" class="hidden bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-300 max-h-[90vh] flex flex-col">
+            <h3 id="grade-modal-title" class="text-xl font-bold mb-4 shrink-0">Add Grade</h3>
             <input type="hidden" id="grade-edit-index" value="-1">
             
-            <div class="space-y-4 mb-6">
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">Grade (e.g. 1.0 - 6.0)</label>
-                    <input type="number" step="0.1" id="grade-val" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none">
-                </div>
-                <div class="flex gap-4">
-                    <div class="flex-1">
-                        <label class="block text-xs text-slate-400 mb-1">Points</label>
-                        <input type="number" id="grade-pts" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none" placeholder="Optional">
+            <div class="overflow-y-auto custom-scrollbar flex-1 pr-2 mb-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Grade (e.g. 1.0 - 6.0)</label>
+                        <input type="number" step="0.1" id="grade-val" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none">
                     </div>
-                    <div class="flex-1">
-                        <label class="block text-xs text-slate-400 mb-1">Max Points</label>
-                        <input type="number" id="grade-max" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none" placeholder="Optional">
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-xs text-slate-400 mb-1">Points</label>
+                            <input type="number" id="grade-pts" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none" placeholder="Optional">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-xs text-slate-400 mb-1">Max Points</label>
+                            <input type="number" id="grade-max" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none" placeholder="Optional">
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">Notes</label>
-                    <input type="text" id="grade-notes" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none" placeholder="e.g., Final Exam">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Notes</label>
+                        <input type="text" id="grade-notes" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none" placeholder="e.g., Final Exam">
+                    </div>
+                    
+                    <div id="dynamic-custom-fields" class="space-y-4 border-t border-slate-700 pt-4 mt-4">
+                        <p class="text-xs text-slate-500">Optional: upload a PDF for any custom column or enter a link/text value.</p>
+                        </div>
                 </div>
             </div>
             
-            <div class="flex gap-3">
+            <div class="flex gap-3 shrink-0">
                 <button onclick="closeModals()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition">Cancel</button>
                 <button onclick="saveGrade()" class="flex-1 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition">Save Grade</button>
+            </div>
+        </div>
+
+        <div id="custom-fields-modal" class="hidden bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-300">
+            <h3 class="text-xl font-bold mb-4">Manage Custom Columns</h3>
+            <p class="text-xs text-slate-400 mb-4">Add or remove columns for this category. (Use the arrows in the table header to reorder them later!)</p>
+            <div id="custom-fields-list" class="space-y-2 mb-6 max-h-48 overflow-y-auto custom-scrollbar"></div>
+            <div class="flex gap-3 mb-6">
+                <input type="text" id="new-field-input" class="flex-1 p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none text-sm" placeholder="Field name (e.g., Exam PDF)">
+                <button onclick="addCustomField()" class="px-4 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg transition font-medium"><i data-lucide="plus" size="16"></i></button>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeModals()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition">Done</button>
             </div>
         </div>
     </div>
@@ -258,7 +275,6 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: user, password: pass })
                 });
-                
                 if(res.ok) alert("Registration successful! You can now log in.");
                 else alert((await res.json()).error || "Registration failed");
             } catch(e) { alert("Server error."); }
@@ -275,7 +291,6 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: user, password: pass })
                 });
-
                 if(res.ok) location.reload();
                 else alert((await res.json()).error || "Login failed");
             } catch(e) { alert("Server error."); }
@@ -302,9 +317,14 @@
         function openModal(id) {
             const backdrop = document.getElementById('modal-backdrop');
             const target = document.getElementById(id);
-            ['subject-modal', 'category-modal', 'grade-modal'].forEach(m => document.getElementById(m).classList.add('hidden'));
+            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal'].forEach(m => document.getElementById(m).classList.add('hidden'));
             backdrop.classList.remove('hidden');
             target.classList.remove('hidden');
+            
+            if(id === 'custom-fields-modal') {
+                renderCustomFieldsList();
+            }
+            
             setTimeout(() => {
                 backdrop.classList.remove('opacity-0');
                 target.classList.remove('scale-95');
@@ -315,17 +335,17 @@
         function closeModals() {
             const backdrop = document.getElementById('modal-backdrop');
             backdrop.classList.add('opacity-0');
-            ['subject-modal', 'category-modal', 'grade-modal'].forEach(m => {
+            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal'].forEach(m => {
                 document.getElementById(m).classList.replace('scale-100', 'scale-95');
             });
             setTimeout(() => { backdrop.classList.add('hidden'); }, 300);
         }
 
-        // --- CRUD SUBJECTS & CATEGORIES ---
+        // --- SUBJECTS & CATEGORIES ---
         function saveSubject() {
             const name = document.getElementById('subject-input').value.trim();
             if(name && !state.subjects[name]) {
-                state.subjects[name] = { "General": { grades: [], notes: "", files: [] } };
+                state.subjects[name] = { "General": { grades: [], customFields: [] } };
                 state.currentSubject = name;
                 state.currentCategory = "General";
                 document.getElementById('subject-input').value = "";
@@ -349,7 +369,7 @@
             if(!state.currentSubject) return;
             const name = document.getElementById('category-input').value.trim();
             if(name && !state.subjects[state.currentSubject][name]) {
-                state.subjects[state.currentSubject][name] = { grades: [], notes: "", files: [] };
+                state.subjects[state.currentSubject][name] = { grades: [], customFields: [] };
                 state.currentCategory = name;
                 document.getElementById('category-input').value = "";
                 closeModals();
@@ -363,7 +383,7 @@
                 delete state.subjects[state.currentSubject][state.currentCategory];
                 const keys = Object.keys(state.subjects[state.currentSubject]);
                 if(keys.length === 0) {
-                    state.subjects[state.currentSubject]["General"] = { grades: [], notes: "", files: [] };
+                    state.subjects[state.currentSubject]["General"] = { grades: [], customFields: [] };
                     state.currentCategory = "General";
                 } else {
                     state.currentCategory = keys[0];
@@ -372,18 +392,79 @@
             }
         }
 
+        // --- CUSTOM FIELDS ---
+        function addCustomField() {
+            if(!state.currentSubject || !state.currentCategory) return;
+            const fieldName = document.getElementById('new-field-input').value.trim();
+            if(!fieldName) return;
+            
+            const categoryData = state.subjects[state.currentSubject][state.currentCategory];
+            if(!categoryData.customFields) categoryData.customFields = [];
+            
+            if(!categoryData.customFields.find(f => f.name.toLowerCase() === fieldName.toLowerCase())) {
+                categoryData.customFields.push({ name: fieldName });
+                document.getElementById('new-field-input').value = '';
+                renderCustomFieldsList();
+                saveData();
+                refreshUI(); // Update the table header immediately
+            }
+        }
+
+        function deleteCustomField(fieldName) {
+            if(!state.currentSubject || !state.currentCategory) return;
+            const categoryData = state.subjects[state.currentSubject][state.currentCategory];
+            categoryData.customFields = categoryData.customFields.filter(f => f.name !== fieldName);
+            
+            categoryData.grades.forEach(g => {
+                if(g.custom) delete g.custom[fieldName];
+            });
+            
+            renderCustomFieldsList();
+            saveData();
+            refreshUI();
+        }
+
+        function moveColumn(index, direction) {
+            if(!state.currentSubject || !state.currentCategory) return;
+            let cols = state.subjects[state.currentSubject][state.currentCategory].customFields;
+            if(direction === -1 && index > 0) {
+                [cols[index-1], cols[index]] = [cols[index], cols[index-1]];
+            } else if (direction === 1 && index < cols.length - 1) {
+                [cols[index+1], cols[index]] = [cols[index], cols[index+1]];
+            }
+            refreshUI();
+        }
+
+        function renderCustomFieldsList() {
+            if(!state.currentSubject || !state.currentCategory) return;
+            const categoryData = state.subjects[state.currentSubject][state.currentCategory];
+            const customFields = categoryData.customFields || [];
+            const container = document.getElementById('custom-fields-list');
+            
+            container.innerHTML = customFields.map(field => `
+                <div class="flex items-center justify-between bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                    <span class="text-sm text-slate-300">${field.name}</span>
+                    <button onclick="deleteCustomField('${field.name}')" class="text-slate-500 hover:text-red-400 p-1 transition">
+                        <i data-lucide="trash-2" size="14"></i>
+                    </button>
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+
         // --- CRUD GRADES ---
         function openGradeModal(editIndex = -1) {
             if(!state.currentSubject) return alert("Create a subject first.");
             document.getElementById('grade-edit-index').value = editIndex;
             
-            // Use .grades because of the new data structure
             const categoryData = state.subjects[state.currentSubject][state.currentCategory];
             const gradesList = Array.isArray(categoryData) ? categoryData : categoryData.grades;
             
+            let grade = null;
             if(editIndex >= 0) {
                 document.getElementById('grade-modal-title').innerText = "Edit Grade";
-                const grade = gradesList[editIndex];
+                grade = gradesList[editIndex];
                 document.getElementById('grade-val').value = grade.note;
                 document.getElementById('grade-pts').value = grade.points || '';
                 document.getElementById('grade-max').value = grade.max || '';
@@ -395,7 +476,89 @@
                 document.getElementById('grade-max').value = '';
                 document.getElementById('grade-notes').value = '';
             }
+
+            renderCustomFieldsInputs(editIndex);
             openModal('grade-modal');
+        }
+
+        function triggerPDFUpload(fieldIndex) {
+            const input = document.getElementById(`pdf-input-${fieldIndex}`);
+            if(input) input.click();
+        }
+
+        async function onCustomPDFChange(event, fieldIndex) {
+            const file = event.target.files[0];
+            if(!file || file.type !== 'application/pdf') return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/api/upload-pdf', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                alert(error.error || 'Upload failed');
+                return;
+            }
+
+            const { path } = await response.json();
+            const fieldName = event.target.dataset.field || null;
+            const hiddenInput = document.querySelector(`.custom-pdf-data[data-field="${fieldName}"]`);
+            const previewContainer = event.target.closest('div');
+            const previewText = previewContainer ? previewContainer.querySelector('p.text-xs') : null;
+
+            if(hiddenInput) {
+                hiddenInput.value = path;
+            }
+            if(previewText) {
+                previewText.innerHTML = `Selected PDF: <span class="text-white">${file.name}</span>`;
+            }
+        }
+
+        function clearPDFSelection(fieldName, fieldIndex) {
+            const hiddenInput = document.querySelector(`.custom-pdf-data[data-field="${fieldName}"]`);
+            const fileInput = document.getElementById(`pdf-input-${fieldIndex}`);
+            const previewText = fileInput ? fileInput.closest('div').querySelector('p.text-xs') : null;
+            if(hiddenInput) hiddenInput.value = '';
+            if(fileInput) fileInput.value = '';
+            if(previewText) previewText.innerHTML = '';
+        }
+
+        function renderCustomFieldsInputs(editIndex) {
+            const categoryData = state.subjects[state.currentSubject][state.currentCategory];
+            const customFields = categoryData.customFields || [];
+            const container = document.getElementById('dynamic-custom-fields');
+            
+            const gradesList = Array.isArray(categoryData) ? categoryData : categoryData.grades;
+            const grade = editIndex >= 0 ? gradesList[editIndex] : null;
+            const customValues = grade && grade.custom ? grade.custom : {};
+            
+            container.innerHTML = customFields.map((field, idx) => {
+                const existingValue = customValues[field.name];
+                const isPdfPath = typeof existingValue === 'string' && existingValue.startsWith('/uploads/');
+                const textValue = isPdfPath ? '' : (existingValue || '');
+                const filename = existingValue.split('/').pop();
+                const pdfLabel = isPdfPath ? `<p class="text-xs text-slate-400 mt-2 max-w-[240px] truncate" title="${filename}">Selected PDF: <span class="text-white">${filename}</span></p>` : '';
+                const clearButton = isPdfPath ? `<button type="button" onclick="clearPDFSelection('${field.name}', ${idx})" class="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm transition">Clear</button>` : '';
+
+                return `
+                    <div class="space-y-2">
+                        <label class="block text-xs text-slate-400 mb-1">${field.name}</label>
+                        <div class="flex gap-2 items-center">
+                            <input type="text" class="flex-1 p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none custom-field-input" 
+                                data-field="${field.name}" value="${textValue}" placeholder="Text or https:// link">
+                            <button type="button" onclick="triggerPDFUpload(${idx})" class="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm transition">Upload PDF</button>
+                            ${clearButton}
+                        </div>
+                        <input type="hidden" class="custom-pdf-data" data-field="${field.name}" value='${isPdfPath ? existingValue : ''}'>
+                        <input id="pdf-input-${idx}" type="file" accept="application/pdf" class="hidden" data-field="${field.name}" onchange="onCustomPDFChange(event, ${idx})">
+                        ${pdfLabel}
+                    </div>
+                `;
+            }).join('');
         }
 
         function saveGrade() {
@@ -403,11 +566,27 @@
             if(isNaN(val)) return;
 
             const editIndex = parseInt(document.getElementById('grade-edit-index').value);
+            
+            let customData = {};
+            document.querySelectorAll('.custom-field-input').forEach(input => {
+                const colName = input.dataset.field;
+                if(input.value.trim() !== '') {
+                    customData[colName] = input.value.trim();
+                }
+            });
+            document.querySelectorAll('.custom-pdf-data').forEach(input => {
+                const colName = input.dataset.field;
+                if(input.value.trim() !== '') {
+                    customData[colName] = input.value.trim();
+                }
+            });
+
             const newGrade = {
                 note: val,
                 points: document.getElementById('grade-pts').value,
                 max: document.getElementById('grade-max').value,
                 notes: document.getElementById('grade-notes').value,
+                custom: customData, 
                 date: new Date().toLocaleDateString()
             };
 
@@ -415,7 +594,7 @@
             let gradesList = Array.isArray(categoryData) ? categoryData : categoryData.grades;
 
             if(editIndex >= 0) {
-                newGrade.date = gradesList[editIndex].date; // Keep original date
+                newGrade.date = gradesList[editIndex].date; 
                 gradesList[editIndex] = newGrade;
             } else {
                 gradesList.push(newGrade);
@@ -446,38 +625,6 @@
             refreshUI();
         }
 
-        // --- NOTES & LINKS ---
-        function saveCategoryNotes(text) {
-            let categoryData = state.subjects[state.currentSubject][state.currentCategory];
-            if (!Array.isArray(categoryData)) {
-                categoryData.notes = text;
-                saveData(); 
-            }
-        }
-
-        function addResourceLink() {
-            if(!state.currentSubject || !state.currentCategory) return;
-            const title = prompt("Name this file (e.g., 'Exam PDF'):");
-            if(!title) return;
-            const url = prompt("Paste the link:");
-            if(!url) return;
-
-            let finalUrl = /^https?:\/\//i.test(url) ? url : 'https://' + url;
-            let categoryData = state.subjects[state.currentSubject][state.currentCategory];
-            if (!categoryData.files) categoryData.files = []; 
-            
-            categoryData.files.push({ name: title, url: finalUrl });
-            refreshUI(); 
-        }
-
-        function deleteResourceLink(index) {
-            if(confirm("Remove this link?")) {
-                state.subjects[state.currentSubject][state.currentCategory].files.splice(index, 1);
-                refreshUI();
-            }
-        }
-
-        // --- NAVIGATION ---
         function nextSubject() {
             const keys = Object.keys(state.subjects);
             if(keys.length < 2) return;
@@ -503,33 +650,29 @@
             return 'grade-danger';
         }
 
-        // --- MASTER UI REFRESH ---
         function refreshUI() {
             saveData(); 
             
             const subjectTitle = document.getElementById('current-subject-title');
             const tabsContainer = document.getElementById('category-tabs');
+            const thead = document.getElementById('table-header');
             const body = document.getElementById('grades-body');
             const subjectAvgLabel = document.getElementById('subject-avg');
             const globalAvgLabel = document.getElementById('global-avg');
 
-            // Handle empty state
             if(!state.currentSubject) {
                 subjectTitle.innerText = "No Subjects Added";
                 tabsContainer.innerHTML = '';
+                thead.innerHTML = '';
                 body.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-500">Add a subject from the sidebar to begin.</td></tr>';
                 subjectAvgLabel.innerText = "N/A";
                 subjectAvgLabel.className = "text-4xl font-bold tracking-tight text-slate-500";
                 globalAvgLabel.innerText = "0.00";
-                
-                const oldFeatures = document.getElementById('dynamic-category-features');
-                if(oldFeatures) oldFeatures.remove();
                 return;
             }
 
             subjectTitle.innerText = state.currentSubject;
             
-            // Build Tabs
             tabsContainer.innerHTML = '';
             const categories = Object.keys(state.subjects[state.currentSubject]);
             categories.forEach(cat => {
@@ -537,87 +680,83 @@
                 const btn = document.createElement('button');
                 btn.className = `px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 whitespace-nowrap ${isActive ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`;
                 
-                if(isActive) {
-                    btn.innerHTML = `${cat} <span onclick="event.stopPropagation(); deleteCategory();" class="hover:text-red-400 ml-1"><i data-lucide="x" size="14"></i></span>`;
-                } else {
-                    btn.innerText = cat;
-                }
+                if(isActive) btn.innerHTML = `${cat} <span onclick="event.stopPropagation(); deleteCategory();" class="hover:text-red-400 ml-1"><i data-lucide="x" size="14"></i></span>`;
+                else btn.innerText = cat;
                 
                 btn.onclick = () => { state.currentCategory = cat; refreshUI(); };
                 tabsContainer.appendChild(btn);
             });
 
-            // --- SEAMLESS DATA MIGRATION ---
             if (Array.isArray(state.subjects[state.currentSubject][state.currentCategory])) {
                 state.subjects[state.currentSubject][state.currentCategory] = {
                     grades: state.subjects[state.currentSubject][state.currentCategory],
-                    notes: "",
-                    files: []
+                    customFields: []
                 };
             }
-            
             const categoryData = state.subjects[state.currentSubject][state.currentCategory];
+            if (!categoryData.customFields) categoryData.customFields = [];
             const grades = categoryData.grades || [];
-            const files = categoryData.files || [];
-            
-            // --- INJECT PANELS (NOTES & LINKS) ---
-            let filesListHTML = files.map((f, i) => `
-                <div class="flex items-center justify-between bg-slate-800/80 p-2 rounded mb-2 group border border-slate-700/50">
-                    <a href="${f.url}" target="_blank" class="text-blue-400 hover:text-blue-300 hover:underline flex items-center gap-2 text-sm truncate">
-                        <i data-lucide="external-link" size="14"></i> ${f.name}
-                    </a>
-                    <button onclick="deleteResourceLink(${i})" class="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition p-1"><i data-lucide="x" size="14"></i></button>
-                </div>
-            `).join('');
+            const customFields = categoryData.customFields;
 
-            const extraFeaturesHTML = `
-                <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700">
-                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Category Notes</label>
-                        <textarea 
-                            onchange="saveCategoryNotes(this.value)" 
-                            class="w-full bg-transparent border-none text-slate-300 focus:ring-0 outline-none resize-y min-h-[80px]" 
-                            placeholder="Add exam rules, topics, or general notes...">${categoryData.notes || ""}</textarea>
-                    </div>
-                    
-                    <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700 flex flex-col">
-                        <div class="flex justify-between items-center mb-3">
-                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Linked PDFs & Resources</label>
-                            <button onclick="addResourceLink()" class="text-xs bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-lg transition flex items-center gap-1 font-semibold border border-blue-500/30">
-                                <i data-lucide="plus" size="12"></i> Add Link
-                            </button>
-                        </div>
-                        <div class="flex-1 overflow-y-auto custom-scrollbar max-h-[100px] pr-2">
-                            ${filesListHTML || '<p class="text-sm text-slate-500 italic mt-2">No files linked yet. Upload PDFs to Google Drive and paste the links here.</p>'}
-                        </div>
-                    </div>
-                </div>
+            // --- BUILD DYNAMIC HEADERS ---
+            let headerHTML = `
+                <th class="p-4 font-semibold text-slate-300">Grade</th>
+                <th class="p-4 font-semibold text-slate-300">Points</th>
+                <th class="p-4 font-semibold text-slate-300">Date</th>
+                <th class="p-4 font-semibold text-slate-300">Notes</th>
             `;
             
-            const tableContainer = document.querySelector('.glass.rounded-2xl.overflow-hidden.flex.flex-col');
-            const oldFeatures = document.getElementById('dynamic-category-features');
-            if(oldFeatures) oldFeatures.remove();
-            
-            const featuresWrapper = document.createElement('div');
-            featuresWrapper.id = 'dynamic-category-features';
-            featuresWrapper.innerHTML = extraFeaturesHTML;
-            tableContainer.parentNode.insertBefore(featuresWrapper, tableContainer);
+            customFields.forEach((field, idx) => {
+                headerHTML += `
+                    <th class="p-4 font-semibold text-slate-300 whitespace-nowrap group">
+                        <div class="flex items-center gap-2">
+                            ${field.name}
+                            <div class="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
+                                <button onclick="moveColumn(${idx}, -1)" class="text-slate-500 hover:text-white" title="Move Left"><i data-lucide="chevron-left" size="14"></i></button>
+                                <button onclick="moveColumn(${idx}, 1)" class="text-slate-500 hover:text-white" title="Move Right"><i data-lucide="chevron-right" size="14"></i></button>
+                            </div>
+                        </div>
+                    </th>
+                `;
+            });
+            headerHTML += `<th class="p-4 font-semibold text-slate-300 text-right">Actions</th>`;
+            thead.innerHTML = headerHTML;
 
-            // --- RENDER GRADES ---
+            // --- BUILD DYNAMIC ROWS ---
             body.innerHTML = '';
             if(grades.length === 0) {
-                body.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-500 border-none">No grades in this category.</td></tr>';
+                body.innerHTML = `<tr><td colspan="${5 + customFields.length}" class="p-8 text-center text-slate-500 border-none">No grades in this category.</td></tr>`;
             } else {
                 grades.forEach((g, i) => {
                     const colorClass = getGradeColorClass(g.note);
                     const pts = g.points ? `${g.points}${g.max ? ` / ${g.max}` : ''}` : '-';
                     
+                    let customFieldsHTML = '';
+                    customFields.forEach(field => {
+                        let value = (g.custom && g.custom[field.name]) ? g.custom[field.name] : '';
+                        let displayVal = value;
+                        
+                        if (typeof value === 'string' && value.startsWith('/uploads/')) {
+                            const filename = value.split('/').pop();
+                            displayVal = `<a href="${value}" target="_blank" title="${filename}" class="inline-flex items-center gap-2 rounded-lg border border-blue-500 bg-blue-500/10 px-3 py-2 text-blue-300 hover:bg-blue-500/15 transition"><i data-lucide="file-text" size="14"></i> View PDF</a>`;
+                        } else if (/^https?:\/\//i.test(value)) {
+                            displayVal = `<a href="${value}" target="_blank" class="text-blue-400 hover:underline flex items-center gap-1 w-fit"><i data-lucide="external-link" size="14"></i> Link</a>`;
+                        } else if (value) {
+                            displayVal = `<span class="max-w-[150px] truncate block" title="${value}">${value}</span>`;
+                        } else {
+                            displayVal = '-';
+                        }
+                        
+                        customFieldsHTML += `<td class="p-4 text-slate-300">${displayVal}</td>`;
+                    });
+                    
                     const row = `
                         <tr class="hover:bg-slate-800/30 transition group">
                             <td class="p-4 font-bold text-lg ${colorClass}">${g.note.toFixed(2)}</td>
-                            <td class="p-4 text-slate-400">${pts}</td>
-                            <td class="p-4 text-slate-400">${g.date}</td>
-                            <td class="p-4 text-slate-300">${g.notes || '-'}</td>
+                            <td class="p-4 text-slate-400 whitespace-nowrap">${pts}</td>
+                            <td class="p-4 text-slate-400 whitespace-nowrap">${g.date}</td>
+                            <td class="p-4 text-slate-300 max-w-[200px] truncate" title="${g.notes || ''}">${g.notes || '-'}</td>
+                            ${customFieldsHTML}
                             <td class="p-4 text-right flex justify-end items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button onclick="moveGrade(${i}, -1)" class="text-slate-500 hover:text-white p-1 rounded transition" title="Move Up"><i data-lucide="arrow-up" size="16"></i></button>
                                 <button onclick="moveGrade(${i}, 1)" class="text-slate-500 hover:text-white p-1 rounded transition mr-2" title="Move Down"><i data-lucide="arrow-down" size="16"></i></button>
@@ -631,7 +770,6 @@
                 });
             }
 
-            // --- CALCULATE AVERAGES ---
             let subjTotal = 0, subjCount = 0;
             categories.forEach(cat => {
                 let catData = state.subjects[state.currentSubject][cat];

@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, send_from_directory
 from flask_bcrypt import Bcrypt
+from werkzeug.utils import secure_filename
 import sqlite3
 import json
 import os
+import uuid
 
 app = Flask(__name__)
 app.secret_key = 'pygrade_super_secret_dev_key' 
@@ -11,6 +13,8 @@ bcrypt = Bcrypt(app)
 # --- FIX 1: Use an absolute path for the database ---
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'pygrade.db')
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
@@ -97,6 +101,32 @@ def get_me():
     return jsonify({"error": "Not logged in"}), 401
 
 # --- API ROUTES FOR GRADES ---
+@app.route('/uploads/<path:filename>')
+def uploaded_file(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=False)
+
+@app.route('/api/upload-pdf', methods=['POST'])
+def upload_pdf():
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if 'file' not in request.files:
+        return jsonify({"error": "Missing file upload"}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No file selected"}), 400
+
+    if file.mimetype != 'application/pdf':
+        return jsonify({"error": "Only PDF uploads are allowed"}), 400
+
+    filename = secure_filename(file.filename)
+    unique_name = f"{session['user_id']}_{uuid.uuid4().hex}_{filename}"
+    save_path = os.path.join(UPLOAD_FOLDER, unique_name)
+    file.save(save_path)
+
+    return jsonify({"path": f"/uploads/{unique_name}", "filename": filename}), 201
+
 @app.route('/api/data', methods=['GET'])
 def get_data():
     if 'user_id' not in session:
