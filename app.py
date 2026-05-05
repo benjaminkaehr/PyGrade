@@ -2,22 +2,25 @@ from flask import Flask, render_template, request, jsonify, session
 from flask_bcrypt import Bcrypt
 import sqlite3
 import json
+import os
 
 app = Flask(__name__)
-# Security key for session cookies
 app.secret_key = 'pygrade_super_secret_dev_key' 
 bcrypt = Bcrypt(app)
 
+# --- FIX 1: Use an absolute path for the database ---
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+DB_PATH = os.path.join(BASE_DIR, 'pygrade.db')
+
 def get_db_connection():
-    conn = sqlite3.connect('pygrade.db')
-    conn.row_factory = sqlite3.Row # Allows us to access columns by name
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row 
     return conn
 
 # --- DATABASE SETUP ---
 def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
-    # Create Users table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,7 +28,6 @@ def init_db():
             password_hash TEXT NOT NULL
         )
     ''')
-    # Create Data table to store grades
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS user_data (
             user_id INTEGER PRIMARY KEY,
@@ -36,6 +38,8 @@ def init_db():
     conn.commit()
     conn.close()
 
+# --- FIX 2: Force the database to initialize when the app starts ---
+init_db()
 # --- WEB ROUTES ---
 @app.route('/')
 def home():
@@ -84,6 +88,13 @@ def login():
 def logout():
     session.clear()
     return jsonify({"message": "Logged out"}), 200
+
+@app.route('/api/me', methods=['GET'])
+def get_me():
+    # Check if the server remembers this browser session
+    if 'username' in session:
+        return jsonify({"username": session['username']}), 200
+    return jsonify({"error": "Not logged in"}), 401
 
 # --- API ROUTES FOR GRADES ---
 @app.route('/api/data', methods=['GET'])
