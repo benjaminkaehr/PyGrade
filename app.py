@@ -137,7 +137,13 @@ def get_data():
     conn.close()
     
     if row and row['data_json']:
-        return jsonify({"subjects": json.loads(row['data_json'])})
+        try:
+            loaded = json.loads(row['data_json'])
+        except json.JSONDecodeError:
+            loaded = {}
+        if isinstance(loaded, dict) and 'subjects' not in loaded:
+            loaded = {"subjects": loaded}
+        return jsonify(loaded)
     return jsonify({"subjects": {}})
 
 @app.route('/api/data', methods=['POST'])
@@ -145,7 +151,12 @@ def save_data():
     if 'user_id' not in session:
         return jsonify({"error": "Unauthorized"}), 401
     
-    data_json = json.dumps(request.json.get('subjects', {}))
+    payload = request.json or {}
+    data = payload.get('data')
+    if data is None:
+        subjects = payload.get('subjects', {})
+        data = {"subjects": subjects}
+    data_json = json.dumps(data)
     
     conn = get_db_connection()
     # Insert or Update the user's data
