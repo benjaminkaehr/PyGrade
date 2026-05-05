@@ -100,6 +100,9 @@
                         <button onclick="openModal('subject-modal')" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
                             <i data-lucide="plus-circle" size="18"></i> Add Subject
                         </button>
+                        <button onclick="openDreamModal()" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
+                            <i data-lucide="sparkles" size="18"></i> Dream Grade
+                        </button>
                     </div>
                 </div>
             </div>
@@ -158,6 +161,7 @@
     </div>
 
     <div id="modal-backdrop" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex justify-center items-center opacity-0 transition-opacity duration-300">
+        
         <div id="subject-modal" class="hidden bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-sm shadow-2xl transform scale-95 transition-transform duration-300">
             <h3 class="text-xl font-bold mb-4">Add New Subject</h3>
             <input type="text" id="subject-input" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 mb-6 focus:border-blue-500 outline-none" placeholder="e.g., Mathematics">
@@ -179,7 +183,6 @@
         <div id="grade-modal" class="hidden bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-300 max-h-[90vh] flex flex-col">
             <h3 id="grade-modal-title" class="text-xl font-bold mb-4 shrink-0">Add Grade</h3>
             <input type="hidden" id="grade-edit-index" value="-1">
-            
             <div class="overflow-y-auto custom-scrollbar flex-1 pr-2 mb-6">
                 <div class="space-y-4">
                     <div>
@@ -200,13 +203,11 @@
                         <label class="block text-xs text-slate-400 mb-1">Notes</label>
                         <input type="text" id="grade-notes" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none" placeholder="e.g., Final Exam">
                     </div>
-                    
                     <div id="dynamic-custom-fields" class="space-y-4 border-t border-slate-700 pt-4 mt-4">
                         <p class="text-xs text-slate-500">Optional: upload a PDF for any custom column or enter a link/text value.</p>
                     </div>
                 </div>
             </div>
-            
             <div class="flex gap-3 shrink-0">
                 <button onclick="closeModals()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition">Cancel</button>
                 <button onclick="saveGrade()" class="flex-1 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition">Save Grade</button>
@@ -224,6 +225,45 @@
             </div>
             <div class="flex gap-3">
                 <button onclick="closeModals()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition">Done</button>
+            </div>
+        </div>
+
+        <div id="dream-modal" class="hidden bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-300">
+            <div class="flex items-center gap-2 mb-4 text-blue-400">
+                <i data-lucide="sparkles" size="20"></i>
+                <h3 class="text-xl font-bold text-white">Dream Grade Calculator</h3>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Target Average</label>
+                    <input type="number" id="dream-target" step="0.01" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none" placeholder="e.g., 5.5">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Calculation Scope</label>
+                    <select id="dream-scope" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none text-white">
+                        <option value="category">Current Category Only</option>
+                        <option value="subject">Entire Subject</option>
+                        <option value="global">All Subjects (Global)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Remaining Exams</label>
+                    <input type="number" id="dream-remaining" step="1" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none" placeholder="How many exams left?">
+                </div>
+                <div id="dream-result-box" class="hidden p-4 rounded-xl bg-blue-600/10 border border-blue-500/30">
+                    <p class="text-sm text-slate-300">To reach a final <span id="dream-rounded-target-label" class="font-bold text-white">--</span> (needs a <span id="dream-min-avg-label">--</span> avg), you need:</p>
+                    <p id="dream-needed-rounded" class="text-5xl font-bold text-blue-400 mt-2">--</p>
+                    <p id="dream-message" class="text-xs text-slate-400 mt-2 italic"></p>
+                    
+                    <div class="mt-4 pt-3 border-t border-blue-500/20 flex items-center justify-between">
+                        <p class="text-xs text-slate-400">For an exact <span id="dream-exact-target-label">--</span> without rounding:</p>
+                        <p id="dream-needed-grade" class="text-lg font-bold text-slate-300">--</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeModals()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition">Close</button>
+                <button onclick="calculateDreamGrade()" class="flex-1 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition font-bold">Calculate</button>
             </div>
         </div>
     </div>
@@ -360,7 +400,7 @@
             const target = document.getElementById(id);
             
             // Hide all modals first
-            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal'].forEach(m => {
+            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal', 'dream-modal'].forEach(m => {
                 document.getElementById(m).classList.add('hidden');
             });
 
@@ -381,7 +421,7 @@
         function closeModals() {
             const backdrop = document.getElementById('modal-backdrop');
             backdrop.classList.add('opacity-0');
-            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal'].forEach(m => {
+            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal', 'dream-modal'].forEach(m => {
                 document.getElementById(m).classList.replace('scale-100', 'scale-95');
             });
             setTimeout(() => { backdrop.classList.add('hidden'); }, 300);
@@ -716,6 +756,92 @@
             refreshUI();
         }
 
+        function openDreamModal() {
+            if(!state.currentSubject) return alert("Please add a subject first!");
+            // Clear previous results
+            document.getElementById('dream-result-box').classList.add('hidden');
+            document.getElementById('dream-target').value = '';
+            document.getElementById('dream-remaining').value = '1';
+            openModal('dream-modal');
+        }
+
+        function calculateDreamGrade() {
+            const target = parseFloat(document.getElementById('dream-target').value);
+            const remaining = parseInt(document.getElementById('dream-remaining').value);
+            const scope = document.getElementById('dream-scope').value;
+
+            if (isNaN(target) || isNaN(remaining) || remaining <= 0) {
+                return alert("Please enter valid target and exam numbers.");
+            }
+
+            let currentGrades = [];
+
+            if (scope === 'category') {
+                const catData = state.subjects[state.currentSubject][state.currentCategory];
+                currentGrades = (Array.isArray(catData) ? catData : catData.grades).map(g => g.note);
+            } else if (scope === 'subject') {
+                Object.values(state.subjects[state.currentSubject]).forEach(cat => {
+                    const grades = Array.isArray(cat) ? cat : cat.grades;
+                    grades.forEach(g => currentGrades.push(g.note));
+                });
+            } else if (scope === 'global') {
+                Object.values(state.subjects).forEach(subj => {
+                    Object.values(subj).forEach(cat => {
+                        const grades = Array.isArray(cat) ? cat : cat.grades;
+                        grades.forEach(g => currentGrades.push(g.note));
+                    });
+                });
+            }
+
+            const currentSum = currentGrades.reduce((a, b) => a + b, 0);
+            const currentCount = currentGrades.length;
+            const totalCount = currentCount + remaining;
+
+            // 1. Calculate Exact Math
+            const neededExact = (target * totalCount - currentSum) / remaining;
+            
+            // 2. Calculate Rounded Math (Target - 0.25 threshold)
+            const minAvgNeeded = target - 0.25;
+            const neededRounded = (minAvgNeeded * totalCount - currentSum) / remaining;
+
+            // Update UI Labels
+            const resultBox = document.getElementById('dream-result-box');
+            resultBox.classList.remove('hidden');
+            
+            document.getElementById('dream-exact-target-label').innerText = target.toFixed(1);
+            document.getElementById('dream-rounded-target-label').innerText = target.toFixed(1);
+            document.getElementById('dream-min-avg-label').innerText = minAvgNeeded.toFixed(2);
+
+            const resultLabel = document.getElementById('dream-needed-grade');
+            const messageLabel = document.getElementById('dream-message');
+            const roundedLabel = document.getElementById('dream-needed-rounded');
+
+            resultLabel.innerText = neededExact.toFixed(2);
+            roundedLabel.innerText = neededRounded.toFixed(2);
+
+            // Styling for PRIMARY (Rounded Result)
+            if (neededRounded > 6.0) {
+                roundedLabel.className = "text-5xl font-bold text-red-400 mt-2";
+                messageLabel.className = "text-xs text-red-400/80 mt-2 italic";
+                messageLabel.innerText = "Even with rounding, this might be impossible (> 6.0).";
+            } else if (neededRounded < 1.0) {
+                roundedLabel.className = "text-5xl font-bold text-green-400 mt-2";
+                messageLabel.className = "text-xs text-green-400/80 mt-2 italic";
+                messageLabel.innerText = "You're already way ahead! Easy mode.";
+            } else {
+                roundedLabel.className = "text-5xl font-bold text-blue-400 mt-2";
+                messageLabel.className = "text-xs text-slate-400 mt-2 italic";
+                messageLabel.innerText = "Keep grinding, you've got this!";
+            }
+
+            // Styling for SECONDARY (Exact Result)
+            if (neededExact > 6.0) {
+                resultLabel.className = "text-lg font-bold text-red-400/60";
+            } else {
+                resultLabel.className = "text-lg font-bold text-slate-300";
+            }
+        }
+        
         function prevSubject() {
             const keys = Object.keys(state.subjects);
             if(keys.length < 2) return;
