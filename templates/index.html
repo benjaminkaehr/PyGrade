@@ -435,22 +435,41 @@
             refreshUI();
         }
 
-        function renderCustomFieldsList() {
-            if(!state.currentSubject || !state.currentCategory) return;
+        function renderCustomFieldsInputs(editIndex) {
             const categoryData = state.subjects[state.currentSubject][state.currentCategory];
             const customFields = categoryData.customFields || [];
-            const container = document.getElementById('custom-fields-list');
+            const container = document.getElementById('dynamic-custom-fields');
             
-            container.innerHTML = customFields.map(field => `
-                <div class="flex items-center justify-between bg-slate-800/50 p-3 rounded-lg border border-slate-700">
-                    <span class="text-sm text-slate-300">${field.name}</span>
-                    <button onclick="deleteCustomField('${field.name}')" class="text-slate-500 hover:text-red-400 p-1 transition">
-                        <i data-lucide="trash-2" size="14"></i>
-                    </button>
-                </div>
-            `).join('');
+            const gradesList = Array.isArray(categoryData) ? categoryData : categoryData.grades;
+            const grade = editIndex >= 0 ? gradesList[editIndex] : null;
+            const customValues = grade && grade.custom ? grade.custom : {};
             
-            lucide.createIcons();
+            container.innerHTML = customFields.map((field, idx) => {
+                const existingValue = customValues[field.name];
+                const isPdfPath = typeof existingValue === 'string' && existingValue.startsWith('/uploads/');
+                const textValue = isPdfPath ? '' : (existingValue || '');
+                
+                // FIX: Only try to get the filename if it's actually a PDF path
+                const filename = isPdfPath ? existingValue.split('/').pop() : '';
+                
+                const pdfLabel = isPdfPath ? `<p class="text-xs text-slate-400 mt-2 max-w-[240px] truncate" title="${filename}">Selected PDF: <span class="text-white">${filename}</span></p>` : '';
+                const clearButton = isPdfPath ? `<button type="button" onclick="clearPDFSelection('${field.name}', ${idx})" class="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm transition">Clear</button>` : '';
+
+                return `
+                    <div class="space-y-2">
+                        <label class="block text-xs text-slate-400 mb-1">${field.name}</label>
+                        <div class="flex gap-2 items-center">
+                            <input type="text" class="flex-1 p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none custom-field-input" 
+                                data-field="${field.name}" value="${textValue}" placeholder="Text or https:// link">
+                            <button type="button" onclick="triggerPDFUpload(${idx})" class="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm transition whitespace-nowrap">Upload PDF</button>
+                            ${clearButton}
+                        </div>
+                        <input type="hidden" class="custom-pdf-data" data-field="${field.name}" value='${isPdfPath ? existingValue : ''}'>
+                        <input id="pdf-input-${idx}" type="file" accept="application/pdf" class="hidden" data-field="${field.name}" onchange="onCustomPDFChange(event, ${idx})">
+                        ${pdfLabel}
+                    </div>
+                `;
+            }).join('');
         }
 
         // --- CRUD GRADES ---
@@ -738,7 +757,7 @@
                         
                         if (typeof value === 'string' && value.startsWith('/uploads/')) {
                             const filename = value.split('/').pop();
-                            displayVal = `<a href="${value}" target="_blank" title="${filename}" class="inline-flex items-center gap-2 rounded-lg border border-blue-500 bg-blue-500/10 px-3 py-2 text-blue-300 hover:bg-blue-500/15 transition"><i data-lucide="file-text" size="14"></i> View PDF</a>`;
+                            displayVal = `<a href="${value}" target="_blank" title="${filename}" class="text-blue-400 hover:underline flex items-center gap-1 max-w-[180px] truncate"><i data-lucide="file-text" size="14"></i> ${filename}</a>`;
                         } else if (/^https?:\/\//i.test(value)) {
                             displayVal = `<a href="${value}" target="_blank" class="text-blue-400 hover:underline flex items-center gap-1 w-fit"><i data-lucide="external-link" size="14"></i> Link</a>`;
                         } else if (value) {
