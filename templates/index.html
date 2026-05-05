@@ -94,6 +94,9 @@
                         <button class="w-full flex items-center gap-3 bg-blue-500/10 text-blue-400 p-3 rounded-lg font-medium transition">
                             <i data-lucide="layout-dashboard" size="18"></i> Dashboard
                         </button>
+                        <button onclick="openModal('custom-fields-modal')" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
+                            <i data-lucide="columns" size="18"></i> Edit Columns
+                        </button>
                         <button onclick="openModal('subject-modal')" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
                             <i data-lucide="plus-circle" size="18"></i> Add Subject
                         </button>
@@ -129,9 +132,6 @@
                 <div class="flex flex-wrap items-center justify-between gap-4 mb-6 p-4 glass rounded-2xl shrink-0">
                     <div id="category-tabs" class="flex gap-2 overflow-x-auto custom-scrollbar pb-1 flex-1"></div>
                     <div class="flex gap-3">
-                        <button onclick="openModal('custom-fields-modal')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sm font-medium rounded-lg transition flex items-center gap-2">
-                            <i data-lucide="columns" size="16"></i> Edit Columns
-                        </button>
                         <button onclick="openModal('category-modal')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sm font-medium rounded-lg transition flex items-center gap-2">
                             <i data-lucide="folder-plus" size="16"></i> Category
                         </button>
@@ -203,7 +203,7 @@
                     
                     <div id="dynamic-custom-fields" class="space-y-4 border-t border-slate-700 pt-4 mt-4">
                         <p class="text-xs text-slate-500">Optional: upload a PDF for any custom column or enter a link/text value.</p>
-                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -216,6 +216,7 @@
         <div id="custom-fields-modal" class="hidden bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-300">
             <h3 class="text-xl font-bold mb-4">Manage Custom Columns</h3>
             <p class="text-xs text-slate-400 mb-4">Add or remove columns for this category. (Use the arrows in the table header to reorder them later!)</p>
+            <div id="calc-field-toggle" class="space-y-3 mb-6"></div>
             <div id="custom-fields-list" class="space-y-2 mb-6 max-h-48 overflow-y-auto custom-scrollbar"></div>
             <div class="flex gap-3 mb-6">
                 <input type="text" id="new-field-input" class="flex-1 p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none text-sm" placeholder="Field name (e.g., Exam PDF)">
@@ -313,11 +314,56 @@
             }
         }
 
+        function evaluateGradeFormula(formula, points, max) {
+            const p = parseFloat(points) || 0;
+            const m = parseFloat(max) || 0;
+            if(!formula || m === 0) return '-';
+            try {
+                const fn = new Function('points', 'max', `return ${formula}`);
+                const result = fn(p, m);
+                return (typeof result === 'number' && isFinite(result)) ? result.toFixed(2) : 'ERR';
+            } catch {
+                return 'ERR';
+            }
+        }
+
+        function toggleCalculatorField(add) {
+            if(!state.currentSubject) return;
+            const categoryData = state.subjects[state.currentSubject][state.currentCategory];
+            if(add) {
+                categoryData.showCalculatedGrade = true;
+                if(!categoryData.formula) categoryData.formula = 'points * 5 / max + 1';
+            } else {
+                categoryData.showCalculatedGrade = false;
+            }
+            renderCustomFieldsList();
+            saveData();
+            refreshUI();
+        }
+
+        function updateFormula(value) {
+            if(!state.currentSubject || !state.currentCategory) return;
+            const categoryData = state.subjects[state.currentSubject][state.currentCategory];
+            categoryData.formula = value.trim() || 'points * 5 / max + 1';
+            saveData();
+            refreshUI();
+        }
+
         // --- MODALS ---
         function openModal(id) {
+            // If trying to edit columns but no subject exists, alert the user
+            if(id === 'custom-fields-modal' && !state.currentSubject) {
+                return alert("Please create and select a subject first!");
+            }
+
             const backdrop = document.getElementById('modal-backdrop');
             const target = document.getElementById(id);
-            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal'].forEach(m => document.getElementById(m).classList.add('hidden'));
+            
+            // Hide all modals first
+            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal'].forEach(m => {
+                document.getElementById(m).classList.add('hidden');
+            });
+
             backdrop.classList.remove('hidden');
             target.classList.remove('hidden');
             
@@ -435,41 +481,53 @@
             refreshUI();
         }
 
-        function renderCustomFieldsInputs(editIndex) {
+        function renderCustomFieldsList() {
+            if(!state.currentSubject || !state.currentCategory) return;
             const categoryData = state.subjects[state.currentSubject][state.currentCategory];
             const customFields = categoryData.customFields || [];
-            const container = document.getElementById('dynamic-custom-fields');
             
-            const gradesList = Array.isArray(categoryData) ? categoryData : categoryData.grades;
-            const grade = editIndex >= 0 ? gradesList[editIndex] : null;
-            const customValues = grade && grade.custom ? grade.custom : {};
-            
-            container.innerHTML = customFields.map((field, idx) => {
-                const existingValue = customValues[field.name];
-                const isPdfPath = typeof existingValue === 'string' && existingValue.startsWith('/uploads/');
-                const textValue = isPdfPath ? '' : (existingValue || '');
+            // Render the Toggle Switch for the Calculated Grade
+            const toggleContainer = document.getElementById('calc-field-toggle');
+            if (toggleContainer) {
+                const isShowingCalc = categoryData.showCalculatedGrade || false;
+                const currentFormula = categoryData.formula || 'points * 5 / max + 1';
                 
-                // FIX: Only try to get the filename if it's actually a PDF path
-                const filename = isPdfPath ? existingValue.split('/').pop() : '';
-                
-                const pdfLabel = isPdfPath ? `<p class="text-xs text-slate-400 mt-2 max-w-[240px] truncate" title="${filename}">Selected PDF: <span class="text-white">${filename}</span></p>` : '';
-                const clearButton = isPdfPath ? `<button type="button" onclick="clearPDFSelection('${field.name}', ${idx})" class="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm transition">Clear</button>` : '';
-
-                return `
-                    <div class="space-y-2">
-                        <label class="block text-xs text-slate-400 mb-1">${field.name}</label>
-                        <div class="flex gap-2 items-center">
-                            <input type="text" class="flex-1 p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none custom-field-input" 
-                                data-field="${field.name}" value="${textValue}" placeholder="Text or https:// link">
-                            <button type="button" onclick="triggerPDFUpload(${idx})" class="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm transition whitespace-nowrap">Upload PDF</button>
-                            ${clearButton}
+                toggleContainer.innerHTML = `
+                    <div class="flex flex-col gap-3 bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-slate-200 font-medium">Calculated Grade Column</p>
+                                <p class="text-xs text-slate-400">Shows next to 'Grade'</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" ${isShowingCalc ? 'checked' : ''} onchange="toggleCalculatorField(this.checked)">
+                                <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
                         </div>
-                        <input type="hidden" class="custom-pdf-data" data-field="${field.name}" value='${isPdfPath ? existingValue : ''}'>
-                        <input id="pdf-input-${idx}" type="file" accept="application/pdf" class="hidden" data-field="${field.name}" onchange="onCustomPDFChange(event, ${idx})">
-                        ${pdfLabel}
+                        ${isShowingCalc ? `
+                        <div class="pt-3 border-t border-slate-700 mt-1">
+                            <label class="text-[11px] text-slate-400 uppercase tracking-widest mb-2 block">Formula Configuration</label>
+                            <input type="text" class="w-full p-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white focus:border-blue-500 outline-none transition" value="${currentFormula}" onchange="updateFormula(this.value)" placeholder="points * 5 / max + 1">
+                            <p class="text-[10px] text-slate-500 mt-1">Updates automatically when changed. Use 'points' and 'max'.</p>
+                        </div>
+                        ` : ''}
                     </div>
+                    <div class="w-full h-px bg-slate-800 my-2"></div>
                 `;
-            }).join('');
+            }
+
+            // Render the rest of the Custom Fields
+            const container = document.getElementById('custom-fields-list');
+            container.innerHTML = customFields.map(field => `
+                <div class="flex items-center justify-between bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                    <span class="text-sm text-slate-300">${field.name}</span>
+                    <button onclick="deleteCustomField('${field.name}')" class="text-slate-500 hover:text-red-400 p-1 transition">
+                        <i data-lucide="trash-2" size="14"></i>
+                    </button>
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
         }
 
         // --- CRUD GRADES ---
@@ -555,11 +613,16 @@
             const grade = editIndex >= 0 ? gradesList[editIndex] : null;
             const customValues = grade && grade.custom ? grade.custom : {};
             
-            container.innerHTML = customFields.map((field, idx) => {
+            container.innerHTML = customFields
+                .filter(field => field.type !== 'formula')
+                .map((field, idx) => {
                 const existingValue = customValues[field.name];
                 const isPdfPath = typeof existingValue === 'string' && existingValue.startsWith('/uploads/');
                 const textValue = isPdfPath ? '' : (existingValue || '');
-                const filename = existingValue.split('/').pop();
+                
+                // FIX: Only try to get the filename if it's actually a PDF path
+                const filename = isPdfPath ? existingValue.split('/').pop() : '';
+                
                 const pdfLabel = isPdfPath ? `<p class="text-xs text-slate-400 mt-2 max-w-[240px] truncate" title="${filename}">Selected PDF: <span class="text-white">${filename}</span></p>` : '';
                 const clearButton = isPdfPath ? `<button type="button" onclick="clearPDFSelection('${field.name}', ${idx})" class="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm transition">Clear</button>` : '';
 
@@ -569,7 +632,7 @@
                         <div class="flex gap-2 items-center">
                             <input type="text" class="flex-1 p-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none custom-field-input" 
                                 data-field="${field.name}" value="${textValue}" placeholder="Text or https:// link">
-                            <button type="button" onclick="triggerPDFUpload(${idx})" class="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm transition">Upload PDF</button>
+                            <button type="button" onclick="triggerPDFUpload(${idx})" class="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm transition whitespace-nowrap">Upload PDF</button>
                             ${clearButton}
                         </div>
                         <input type="hidden" class="custom-pdf-data" data-field="${field.name}" value='${isPdfPath ? existingValue : ''}'>
@@ -714,18 +777,28 @@
             }
             const categoryData = state.subjects[state.currentSubject][state.currentCategory];
             if (!categoryData.customFields) categoryData.customFields = [];
+            if (!categoryData.formula) categoryData.formula = 'points * 5 / max + 1';
             const grades = categoryData.grades || [];
             const customFields = categoryData.customFields;
 
             // --- BUILD DYNAMIC HEADERS ---
             let headerHTML = `
                 <th class="p-4 font-semibold text-slate-300">Grade</th>
+            `;
+            
+            if(categoryData.showCalculatedGrade) {
+                headerHTML += `<th class="p-4 font-semibold text-slate-300">Calculated Grade</th>`;
+            }
+            
+            headerHTML += `
                 <th class="p-4 font-semibold text-slate-300">Points</th>
                 <th class="p-4 font-semibold text-slate-300">Date</th>
                 <th class="p-4 font-semibold text-slate-300">Notes</th>
             `;
             
-            customFields.forEach((field, idx) => {
+            customFields
+                .filter(field => field.type !== 'formula')
+                .forEach((field, idx) => {
                 headerHTML += `
                     <th class="p-4 font-semibold text-slate-300 whitespace-nowrap group">
                         <div class="flex items-center gap-2">
@@ -744,18 +817,24 @@
             // --- BUILD DYNAMIC ROWS ---
             body.innerHTML = '';
             if(grades.length === 0) {
-                body.innerHTML = `<tr><td colspan="${5 + customFields.length}" class="p-8 text-center text-slate-500 border-none">No grades in this category.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="${(categoryData.showCalculatedGrade ? 1 : 0) + 5 + customFields.filter(f => f.type !== 'formula').length}" class="p-8 text-center text-slate-500 border-none">No grades in this category.</td></tr>`;
             } else {
                 grades.forEach((g, i) => {
                     const colorClass = getGradeColorClass(g.note);
                     const pts = g.points ? `${g.points}${g.max ? ` / ${g.max}` : ''}` : '-';
                     
                     let customFieldsHTML = '';
-                    customFields.forEach(field => {
+                    customFields
+                        .filter(field => field.type !== 'formula')
+                        .forEach(field => {
                         let value = (g.custom && g.custom[field.name]) ? g.custom[field.name] : '';
                         let displayVal = value;
                         
-                        if (typeof value === 'string' && value.startsWith('/uploads/')) {
+                        if (field.type === 'formula') {
+                            const formula = categoryData.formula || 'points * 5 / max + 1';
+                            const computed = evaluateGradeFormula(formula, g.points, g.max);
+                            displayVal = `<span class="text-slate-200 font-medium">${computed}</span>`;
+                        } else if (typeof value === 'string' && value.startsWith('/uploads/')) {
                             const filename = value.split('/').pop();
                             displayVal = `<a href="${value}" target="_blank" title="${filename}" class="text-blue-400 hover:underline flex items-center gap-1 max-w-[180px] truncate"><i data-lucide="file-text" size="14"></i> ${filename}</a>`;
                         } else if (/^https?:\/\//i.test(value)) {
@@ -772,6 +851,7 @@
                     const row = `
                         <tr class="hover:bg-slate-800/30 transition group">
                             <td class="p-4 font-bold text-lg ${colorClass}">${g.note.toFixed(2)}</td>
+                            ${categoryData.showCalculatedGrade ? `<td class="p-4 text-slate-200 font-medium">${evaluateGradeFormula(categoryData.formula || 'points * 5 / max + 1', g.points, g.max)}</td>` : ''}
                             <td class="p-4 text-slate-400 whitespace-nowrap">${pts}</td>
                             <td class="p-4 text-slate-400 whitespace-nowrap">${g.date}</td>
                             <td class="p-4 text-slate-300 max-w-[200px] truncate" title="${g.notes || ''}">${g.notes || '-'}</td>
