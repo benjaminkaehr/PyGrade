@@ -6,6 +6,7 @@
     <title>PyGrade Web Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
@@ -319,7 +320,7 @@
                 <span id="report-card-semester" class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg text-sm font-bold"></span>
             </div>
             
-            <div class="overflow-y-auto custom-scrollbar max-h-[60vh] mb-6 pr-2">
+            <div id="report-card-content" class="overflow-y-auto custom-scrollbar max-h-[60vh] mb-6 pr-2">
                 <table class="w-full text-left text-sm whitespace-nowrap">
                     <thead class="border-b border-slate-700 sticky top-0 bg-slate-900 z-10">
                         <tr>
@@ -338,8 +339,14 @@
                 <span id="report-card-total" class="text-3xl font-bold text-white">--</span>
             </div>
 
-            <div class="mt-6 flex justify-end">
-                <button onclick="closeModals()" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition font-bold w-full">Close Report</button>
+            <div class="mt-6 flex justify-end gap-3">
+                <button onclick="exportReportCard('csv')" class="px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition font-medium flex items-center gap-2">
+                    <i data-lucide="download" size="18"></i> CSV
+                </button>
+                <button onclick="exportReportCard('pdf')" class="px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition font-medium flex items-center gap-2">
+                    <i data-lucide="file-pdf" size="18"></i> PDF
+                </button>
+                <button onclick="closeModals()" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition font-bold">Close</button>
             </div>
         </div>
 
@@ -861,9 +868,10 @@
                     </tr>
                 `;
 
-                // 2. Die Unter-Zeilen für Module zeichnen (mit dem coolen Baum-Design `| - `)
+                // 2. Die Unter-Zeilen für Module zeichnen (mit dem coolen Baum-Design `| - ` und Farben)
                 modules.forEach((m, index) => {
                     const isLast = index === modules.length - 1;
+                    const moduleColor = getGradeColor(m.rounded);
                     tbody.innerHTML += `
                         <tr class="hover:bg-slate-800/30 transition ${isLast ? 'border-b border-slate-800/50' : ''}">
                             <td class="py-2 px-2 text-slate-400 font-medium pl-6 relative">
@@ -872,7 +880,7 @@
                                 ${m.name}
                             </td>
                             <td class="py-2 px-2 text-right text-slate-500 text-sm">${m.raw.toFixed(2)}</td>
-                            <td class="py-2 px-2 text-right font-bold text-slate-300">${m.rounded.toFixed(1)}</td>
+                            <td class="py-2 px-2 text-right font-bold" style="color: ${moduleColor};">${m.rounded.toFixed(1)}</td>
                         </tr>
                     `;
                 });
@@ -891,6 +899,105 @@
             }
             
             openModal('report-card-modal');
+        }
+
+        function exportReportCard(format) {
+            const semester = state.currentSemester;
+            
+            if(format === 'csv') {
+                exportReportCardAsCSV(semester);
+            } else if(format === 'pdf') {
+                exportReportCardAsPDF(semester);
+            }
+        }
+
+        function exportReportCardAsCSV(semester) {
+            const subjects = state.semesters[semester] || {};
+            let csvContent = 'Subject,Unrounded,Real Grade,Type\n';
+            
+            Object.keys(subjects).forEach(subjName => {
+                let standardTotal = 0;
+                let standardWeightCount = 0;
+                let modules = [];
+                
+                Object.keys(subjects[subjName]).forEach(catName => {
+                    let catData = subjects[subjName][catName];
+                    const grades = Array.isArray(catData) ? catData : (catData.grades || []);
+
+                    if (catData.isStandaloneModule) {
+                        let modTotal = 0;
+                        let modWeightCount = 0;
+                        grades.forEach(g => {
+                            let w = g.weight !== undefined ? g.weight : 1;
+                            modTotal += (g.note * w);
+                            modWeightCount += w;
+                        });
+                        if (modWeightCount > 0) {
+                            modules.push({
+                                name: catName,
+                                raw: modTotal / modWeightCount,
+                                rounded: roundToHalf(modTotal / modWeightCount)
+                            });
+                        }
+                    } else {
+                        grades.forEach(g => {
+                            let w = g.weight !== undefined ? g.weight : 1;
+                            standardTotal += (g.note * w);
+                            standardWeightCount += w;
+                        });
+                    }
+                });
+                
+                let isOnlyStandard = modules.length === 0 && standardWeightCount > 0;
+                let hasGrades = modules.length > 0 || standardWeightCount > 0;
+                if (!hasGrades) return;
+
+                let subjectUnroundedAvg = 0;
+                let subjectFinalRounded = 0;
+
+                if (isOnlyStandard) {
+                    subjectUnroundedAvg = standardTotal / standardWeightCount;
+                    subjectFinalRounded = roundToHalf(subjectUnroundedAvg);
+                } else {
+                    let subjectRawSum = 0;
+                    let subjectItemCount = 0;
+                    if (standardWeightCount > 0) {
+                        let standardRaw = standardTotal / standardWeightCount;
+                        subjectRawSum += roundToHalf(standardRaw);
+                        subjectItemCount++;
+                    }
+                    modules.forEach(m => {
+                        subjectRawSum += m.rounded;
+                        subjectItemCount++;
+                    });
+                    subjectUnroundedAvg = subjectRawSum / subjectItemCount;
+                    subjectFinalRounded = roundToHalf(subjectUnroundedAvg);
+                }
+
+                csvContent += `"${subjName}",${subjectUnroundedAvg.toFixed(2)},${subjectFinalRounded.toFixed(1)},Subject\n`;
+                
+                modules.forEach(m => {
+                    csvContent += `"  ${m.name}",${m.raw.toFixed(2)},${m.rounded.toFixed(1)},Subcategory\n`;
+                });
+            });
+
+            const link = document.createElement('a');
+            link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
+            link.download = `Report_Card_${semester.replace(' ', '_')}_${new Date().toLocaleDateString('en-CA')}.csv`;
+            link.click();
+        }
+
+        function exportReportCardAsPDF(semester) {
+            const element = document.getElementById('report-card-content');
+            const opt = {
+                margin: 10,
+                filename: `Report_Card_${semester.replace(' ', '_')}_${new Date().toLocaleDateString('en-CA')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+            };
+            
+            html2pdf().set(opt).from(element).save();
         }
 
         // --- SUBJECTS & CATEGORIES ---
