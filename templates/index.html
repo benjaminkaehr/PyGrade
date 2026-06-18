@@ -1902,9 +1902,11 @@
                             // Explicit ABU sorting
                             if (nameLower.includes('abu') || nameLower.includes('allgemeinbildung')) {
                                 if (cNameLower.includes('sprache') || cNameLower.includes('kommunikation')) {
-                                    breakdown.abu.sprache.push(catAvg);
+                                    // Zeugnisnoten are rounded to 1/2 per semester
+                                    breakdown.abu.sprache.push(roundHalf(catAvg)); 
                                 } else if (cNameLower.includes('gesellschaft')) {
-                                    breakdown.abu.gesellschaft.push(catAvg);
+                                    // Zeugnisnoten are rounded to 1/2 per semester
+                                    breakdown.abu.gesellschaft.push(roundHalf(catAvg)); 
                                 } else if (cNameLower.includes('va') || cNameLower.includes('vertiefung')) {
                                     breakdown.abu.va.push(catAvg);
                                 } else if (cNameLower.includes('schluss') || cNameLower.includes('prüfung')) {
@@ -1927,11 +1929,17 @@
                     // Route remaining Subjects
                     if (subjWeight > 0 || ipaRes || ipaDok || ipaFach) {
                         let avg = subjWeight > 0 ? subjSum / subjWeight : 0;
+                        
+                        // Default entry
                         let entry = { name: subjName, sem: semName.replace('Semester ', 'Sem '), avg: avg };
 
                         if (nameLower.includes('ük') || nameLower.includes('uek')) {
+                            // Modules are rounded to 1/2 on the Zeugnis
+                            entry.avg = roundHalf(avg); 
                             breakdown.ikUek.push(entry);
                         } else if (nameLower.includes('informatik') || nameLower.includes('modul') || nameLower.includes('bk')) {
+                            // Modules are rounded to 1/2 on the Zeugnis
+                            entry.avg = roundHalf(avg); 
                             breakdown.ikBfs.push(entry);
                         } else if (nameLower.includes('math')) {
                             breakdown.egkSemesters[semName].math = roundHalf(avg);
