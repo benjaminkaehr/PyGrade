@@ -1798,46 +1798,6 @@
                         `;
                         body.innerHTML += row;
                     });
-
-                    // Add subcategory average rows for all categories
-                    const colCount = (categoryData.showCalculatedGrade ? 1 : 0) + 6 + customFields.filter(f => f.type !== 'formula').length;
-                    const allCategories = Object.keys(state.semesters[state.currentSemester][state.currentSubject]);
-                    
-                    if(allCategories.length > 1) {
-                        body.innerHTML += `<tr class="border-t-2 border-slate-700 h-1"><td colspan="${colCount}"></td></tr>`;
-                        
-                        allCategories.forEach(catName => {
-                            let catData = state.semesters[state.currentSemester][state.currentSubject][catName];
-                            let catGrades = Array.isArray(catData) ? catData : (catData.grades || []);
-                            
-                            let catTotal = 0;
-                            let catWeightCount = 0;
-                            catGrades.forEach(g => {
-                                let w = g.weight !== undefined ? g.weight : 1;
-                                catTotal += (g.note * w);
-                                catWeightCount += w;
-                            });
-                            
-                            if (catWeightCount > 0) {
-                                const catAvg = catTotal / catWeightCount;
-                                const catColor = getGradeColor(catAvg);
-                                const emptyTds = customFields.filter(f => f.type !== 'formula').length;
-                                
-                                body.innerHTML += `
-                                    <tr class="bg-slate-800/40 hover:bg-slate-800/60 transition border-b border-slate-700/50">
-                                        <td class="p-4 font-bold text-lg" style="color: ${catColor};">${catAvg.toFixed(2)}</td>
-                                        ${categoryData.showCalculatedGrade ? `<td class="p-4"></td>` : ''}
-                                        <td class="p-4 text-slate-500 text-sm italic font-medium">—</td>
-                                        <td class="p-4 text-slate-500 text-sm italic">Category Avg</td>
-                                        <td class="p-4 text-slate-400 text-sm">${catName}</td>
-                                        <td class="p-4"></td>
-                                        ${Array(emptyTds).fill('<td class="p-4"></td>').join('')}
-                                        <td class="p-4"></td>
-                                    </tr>
-                                `;
-                            }
-                        });
-                    }
                 }
 
                 // Subject Average
