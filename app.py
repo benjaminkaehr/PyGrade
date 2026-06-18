@@ -170,6 +170,63 @@ def save_data():
     
     return jsonify({"message": "Data saved successfully!"}), 200
 
+@app.route('/api/qv-standing', methods=['GET'])
+def get_qv_standing():
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    conn = get_db_connection()
+    row = conn.execute("SELECT data_json FROM user_data WHERE user_id=?", (session['user_id'],)).fetchone()
+    conn.close()
+
+    subjects = {}
+    if row and row['data_json']:
+        try:
+            data = json.loads(row['data_json'])
+            subjects = data.get('subjects', {})
+        except json.JSONDecodeError:
+            pass
+
+    # BiVo 2021 Calculation Logic (Example weights for Informatiker/in EFZ)
+    # Note: These weights should be adjusted based on the specific graphic reference
+    categories = {
+        "berufskunde": {"sum": 0, "count": 0, "weight": 0.30},
+        "allgemeinbildung": {"sum": 0, "count": 0, "weight": 0.20},
+        "erfahrungsnote": {"sum": 0, "count": 0, "weight": 0.20},
+        "ipa": {"sum": 0, "count": 0, "weight": 0.30}
+    }
+
+    for name, info in subjects.items():
+        cat = info.get('category', '').lower()
+        grade = info.get('grade')
+        
+        if cat in categories and grade:
+            try:
+                categories[cat]["sum"] += float(grade)
+                categories[cat]["count"] += 1
+            except ValueError:
+                continue
+
+    results = {}
+    total_weighted_grade = 0
+    total_weight_used = 0
+
+    for cat, val in categories.items():
+        avg = round(val["sum"] / val["count"], 1) if val["count"] > 0 else 0
+        results[cat] = avg
+        if avg > 0:
+            total_weighted_grade += avg * val["weight"]
+            total_weight_used += val["weight"]
+
+    # Normalize grade if not all categories are filled yet
+    if total_weight_used > 0:
+        # Scaling the weighted average to represent the current standing out of 100% of filled categories
+        final_standing = round(total_weighted_grade / total_weight_used, 1)
+    else:
+        final_standing = 0.0
+
+    return jsonify({"categories": results, "final_standing": final_standing})
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True, port=5000)

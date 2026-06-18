@@ -116,6 +116,10 @@
                         <button onclick="openReportCard()" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
                             <i data-lucide="file-badge" size="18"></i> Report Card
                         </button>
+                        <!-- Add this inside your menu button list -->
+                        <button onclick="openQVModal()" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
+                            <i data-lucide="target" size="18"></i> QV Standing
+                        </button>
                         <button onclick="openModal('settings-modal')" class="w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white p-3 rounded-lg font-medium transition">
                             <i data-lucide="palette" size="18"></i> Grade Colors
                         </button>
@@ -340,6 +344,177 @@
 
             <div class="mt-6 flex justify-end">
                 <button onclick="closeModals()" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition font-bold w-full">Close Report</button>
+            </div>
+        </div>
+
+        <!-- NEW QV DETAILED MODAL -->
+        <div id="qv-modal" class="hidden bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-5xl shadow-2xl transform scale-95 transition-transform duration-300 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-6 shrink-0">
+                <div class="flex items-center gap-3 text-blue-400">
+                    <i data-lucide="target" size="28"></i>
+                    <div>
+                        <h3 class="text-2xl font-bold text-white leading-tight">QV Standing & Breakdown</h3>
+                        <p class="text-xs text-slate-400">Calculated live using BiVo 2021 rules</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider font-bold mb-1">Projected Final Grade</p>
+                    <p id="qv-modal-final" class="text-4xl font-bold text-white leading-none">--</p>
+                </div>
+            </div>
+
+            <div id="qv-modal-status-box" class="mb-6 p-4 rounded-xl bg-slate-800 border border-slate-700 flex items-center gap-3 shrink-0">
+                <i id="qv-modal-status-icon" data-lucide="info" class="text-slate-400"></i>
+                <p id="qv-modal-status" class="text-sm text-slate-300 font-medium">Add subjects to track your standing.</p>
+            </div>
+
+           <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 pb-4">
+                
+                <!-- 1. IPA Block (Matches PDF Row 1) -->
+                <div class="bg-slate-800/40 rounded-xl border border-slate-700/50 flex flex-col md:flex-row overflow-hidden mb-4">
+                    <div class="flex-1 p-5 border-b md:border-b-0 md:border-r border-slate-700/50 flex flex-col">
+                        <h4 class="font-bold text-white text-base mb-3">Bewertung individuelle praktische Arbeit (IPA)</h4>
+                        <div id="qv-modal-ipa-list" class="space-y-1 mb-2 flex-1"></div>
+                    </div>
+                    <div class="w-full md:w-56 bg-slate-800/60 p-5 flex flex-col justify-center border-b md:border-b-0 md:border-r border-slate-700/50">
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider mb-3 font-semibold text-center">Gesamtnote IPA</p>
+                        <div class="bg-slate-900/50 p-2.5 rounded-lg w-full">
+                            <div class="flex justify-between items-center text-[10px] font-mono text-slate-400 mb-1.5">
+                                <span>Unrounded:</span>
+                                <span id="qv-modal-ipa-raw">--</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs font-mono text-slate-300 pt-1.5 border-t border-slate-700/50">
+                                <span>gerundet auf 1/10:</span>
+                                <span id="qv-modal-ipa-round" class="font-bold text-white">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-48 p-5 flex flex-col justify-center items-center bg-slate-900/40">
+                        <p class="text-xs font-bold text-slate-300 mb-2 uppercase tracking-wider text-center">Note IPA <span class="text-white">40%</span></p>
+                        <span id="qv-modal-ipa-final" class="text-4xl font-bold">--</span>
+                    </div>
+                </div>
+
+                <!-- 2. IK Block (Matches PDF Row 2) -->
+                <div class="bg-slate-800/40 rounded-xl border border-slate-700/50 flex flex-col md:flex-row overflow-hidden mb-4">
+                    <div class="flex-1 p-5 border-b md:border-b-0 md:border-r border-slate-700/50 flex flex-col">
+                        <h4 class="font-bold text-white text-base mb-4">Erfahrungsnote Informatikkompetenzen (IK)</h4>
+                        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 flex-1">
+                            <div class="flex flex-col">
+                                <p class="text-xs font-semibold text-slate-300 mb-2 flex justify-between">Berufsfachschule (Bfs) <span class="text-slate-500 font-normal ml-2">&rarr; 80%</span></p>
+                                <div id="qv-modal-ik-bfs-list" class="space-y-1 mb-3 flex-1"></div>
+                                <div class="text-[10px] text-slate-400 font-mono bg-slate-900/50 px-2.5 py-1.5 rounded-lg flex justify-between items-center">
+                                    <span>Avg: <span id="qv-modal-ik-bfs-raw">--</span></span>
+                                    <span>gerundet 1/2: <span id="qv-modal-ik-bfs-round" class="text-white font-bold">--</span></span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <p class="text-xs font-semibold text-slate-300 mb-2 flex justify-between">Überbetriebliche Kurse (ÜK) <span class="text-slate-500 font-normal ml-2">&rarr; 20%</span></p>
+                                <div id="qv-modal-ik-uek-list" class="space-y-1 mb-3 flex-1"></div>
+                                <div class="text-[10px] text-slate-400 font-mono bg-slate-900/50 px-2.5 py-1.5 rounded-lg flex justify-between items-center">
+                                    <span>Avg: <span id="qv-modal-ik-uek-raw">--</span></span>
+                                    <span>gerundet 1/2: <span id="qv-modal-ik-uek-round" class="text-white font-bold">--</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-56 bg-slate-800/60 p-5 flex flex-col justify-center border-b md:border-b-0 md:border-r border-slate-700/50">
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider mb-3 font-semibold text-center">Gesamtnote IK</p>
+                        <div class="bg-slate-900/50 p-2.5 rounded-lg w-full text-[10px] font-mono text-slate-400 space-y-1.5">
+                            <p class="flex justify-between"><span>1. Bfs (80%)</span><span>Rd 1/2</span></p>
+                            <p class="flex justify-between"><span>2. ÜK (20%)</span><span>Rd 1/2</span></p>
+                            <p class="pt-1.5 border-t border-slate-700/50 text-center text-slate-300">Gesamt gerundet auf 1/10</p>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-48 p-5 flex flex-col justify-center items-center bg-slate-900/40">
+                        <p class="text-xs font-bold text-slate-300 mb-2 uppercase tracking-wider text-center">Note IK <span class="text-white">30%</span></p>
+                        <span id="qv-modal-ik-final" class="text-4xl font-bold">--</span>
+                    </div>
+                </div>
+
+                <!-- 3. eGK Block (Matches PDF Row 3) -->
+                <div class="bg-slate-800/40 rounded-xl border border-slate-700/50 flex flex-col md:flex-row overflow-hidden mb-4">
+                    <div class="flex-1 p-5 border-b md:border-b-0 md:border-r border-slate-700/50 flex flex-col">
+                        <h4 class="font-bold text-white text-base mb-3">Erfahrungsnote erweiterte Grundkompetenzen (eGK)</h4>
+                        <div id="qv-modal-egk-list" class="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-2 max-h-56"></div>
+                    </div>
+                    <div class="w-full md:w-56 bg-slate-800/60 p-5 flex flex-col justify-center border-b md:border-b-0 md:border-r border-slate-700/50">
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider mb-3 font-semibold text-center">Gesamtnote eGK</p>
+                        <div class="bg-slate-900/50 p-2.5 rounded-lg w-full">
+                            <div class="flex justify-between items-center text-[10px] font-mono text-slate-400 mb-1.5">
+                                <span>Unrounded (8 Sem):</span>
+                                <span id="qv-modal-egk-raw">--</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs font-mono text-slate-300 pt-1.5 border-t border-slate-700/50">
+                                <span>gerundet auf 1/2:</span>
+                                <span id="qv-modal-egk-round" class="font-bold text-white">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-48 p-5 flex flex-col justify-center items-center bg-slate-900/40">
+                        <p class="text-xs font-bold text-slate-300 mb-2 uppercase tracking-wider text-center">Note eGK <span class="text-white">10%</span></p>
+                        <span id="qv-modal-egk-final" class="text-4xl font-bold">--</span>
+                    </div>
+                </div>
+
+                <!-- 4. ABU Block (Matches PDF Row 4) -->
+                <div class="bg-slate-800/40 rounded-xl border border-slate-700/50 flex flex-col md:flex-row overflow-hidden mb-4">
+                    <div class="flex-1 p-5 border-b md:border-b-0 md:border-r border-slate-700/50 flex flex-col">
+                        <h4 class="font-bold text-white text-base mb-3">Bewertung Allgemeinbildung (ABU)</h4>
+                        <div class="space-y-3 flex-1">
+                            <!-- Erfa Teil -->
+                            <div class="bg-slate-900/30 p-3 rounded-lg border border-slate-700/50">
+                                <p class="text-xs font-semibold text-slate-300 mb-2 border-b border-slate-700/50 pb-1 flex justify-between">
+                                    Erfa Note ABU <span class="text-slate-500 font-normal ml-2">&rarr; 1/3</span>
+                                </p>
+                                <div class="flex justify-between items-center text-xs py-1">
+                                    <span class="text-slate-400">Sprache u. Kommunikation <span class="text-[9px] ml-1 text-slate-500">(1/2)</span></span>
+                                    <span id="qv-modal-abu-sprache" class="font-bold text-slate-300">--</span>
+                                </div>
+                                <div class="flex justify-between items-center text-xs py-1">
+                                    <span class="text-slate-400">Gesellschaft <span class="text-[9px] ml-1 text-slate-500">(1/2)</span></span>
+                                    <span id="qv-modal-abu-gesellschaft" class="font-bold text-slate-300">--</span>
+                                </div>
+                                <div class="mt-2 pt-2 border-t border-slate-700/50 flex justify-between items-center text-[10px] font-mono text-slate-400">
+                                    <span>Erfa Durchschnitt:</span>
+                                    <span id="qv-modal-abu-erfa-raw" class="text-white font-bold">--</span>
+                                </div>
+                            </div>
+                            
+                            <!-- VA & SP -->
+                            <div class="flex justify-between items-center text-xs py-2 px-3 bg-slate-900/30 rounded-lg border border-slate-700/50">
+                                <span class="text-slate-400">Vertiefungsarbeit VA <span class="text-[9px] ml-1 text-slate-500">&rarr; 1/3</span></span>
+                                <span id="qv-modal-abu-va" class="font-bold text-slate-300">--</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs py-2 px-3 bg-slate-900/30 rounded-lg border border-slate-700/50">
+                                <span class="text-slate-400">Note Schlussprüfung <span class="text-[9px] ml-1 text-slate-500">&rarr; 1/3</span></span>
+                                <span id="qv-modal-abu-sp" class="font-bold text-slate-300">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-56 bg-slate-800/60 p-5 flex flex-col justify-center border-b md:border-b-0 md:border-r border-slate-700/50">
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider mb-3 font-semibold text-center">Gesamtnote ABU</p>
+                        <div class="bg-slate-900/50 p-2.5 rounded-lg w-full">
+                            <div class="flex justify-between items-center text-[10px] font-mono text-slate-400 mb-1.5">
+                                <span>Unrounded:</span>
+                                <span id="qv-modal-abu-raw">--</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs font-mono text-slate-300 pt-1.5 border-t border-slate-700/50">
+                                <span>gerundet auf 1/10:</span>
+                                <span id="qv-modal-abu-round" class="font-bold text-white">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-48 p-5 flex flex-col justify-center items-center bg-slate-900/40">
+                        <p class="text-xs font-bold text-slate-300 mb-2 uppercase tracking-wider text-center">Note ABU <span class="text-white">20%</span></p>
+                        <span id="qv-modal-abu-final" class="text-4xl font-bold">--</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mt-6 flex justify-end shrink-0 pt-4 border-t border-slate-800">
+                <button onclick="closeModals()" class="px-8 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition font-bold">Close Breakdown</button>
             </div>
         </div>
 
@@ -729,7 +904,7 @@
             const target = document.getElementById(id);
             
             // FIX: Added 'settings-modal' to this list so it hides properly!
-            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal', 'dream-modal', 'report-card-modal', 'settings-modal'].forEach(m => {
+            ['subject-modal', 'category-modal', 'grade-modal', 'custom-fields-modal', 'dream-modal', 'report-card-modal', 'settings-modal', 'qv-modal'].forEach(m => {
                 const el = document.getElementById(m);
                 if (el) el.classList.add('hidden');
             });
@@ -1569,9 +1744,279 @@
             }
 
             lucide.createIcons();
+            
         }
 
         lucide.createIcons();
+
+        function openQVModal() {
+            calculateQVDetailed();
+            openModal('qv-modal');
+        }
+
+        function calculateQVDetailed() {
+            // Data buckets
+            let breakdown = {
+                ikBfs: [], ikUek: [], egk: [], ipa: [],
+                egkSemesters: {},
+                abu: { sprache: [], gesellschaft: [], va: [], sp: [] }
+            };
+
+            const roundHalf = num => Math.round(num * 2) / 2;
+            const roundTenth = num => Math.round(num * 10) / 10;
+            const calcAvg = arr => arr.length > 0 ? arr.reduce((sum, item) => sum + item.avg, 0) / arr.length : 0;
+            const calcAvgPlain = arr => arr.length > 0 ? arr.reduce((sum, item) => sum + item, 0) / arr.length : 0;
+
+            // Gather all subjects and their averages
+            Object.entries(state.semesters).forEach(([semName, sem]) => {
+                if (!breakdown.egkSemesters[semName]) breakdown.egkSemesters[semName] = { math: null, eng: null };
+
+                Object.entries(sem).forEach(([subjName, categories]) => {
+                    let nameLower = subjName.toLowerCase();
+                    if (nameLower.includes('sport')) return;
+
+                    let subjSum = 0, subjWeight = 0;
+                    let ipaRes = null, ipaDok = null, ipaFach = null;
+
+                    Object.entries(categories).forEach(([catName, catData]) => {
+                        let catSum = 0, catWeight = 0;
+                        let catGrades = Array.isArray(catData) ? catData : (catData.grades || []);
+                        
+                        catGrades.forEach(g => {
+                            let w = g.weight !== undefined ? g.weight : 1;
+                            catSum += (g.note * w);
+                            catWeight += w;
+                        });
+
+                        if (catWeight > 0) {
+                            let catAvg = catSum / catWeight;
+                            let cNameLower = catName.toLowerCase();
+
+                            // Explicit ABU sorting
+                            if (nameLower.includes('abu') || nameLower.includes('allgemeinbildung')) {
+                                if (cNameLower.includes('sprache') || cNameLower.includes('kommunikation')) {
+                                    breakdown.abu.sprache.push(catAvg);
+                                } else if (cNameLower.includes('gesellschaft')) {
+                                    breakdown.abu.gesellschaft.push(catAvg);
+                                } else if (cNameLower.includes('va') || cNameLower.includes('vertiefung')) {
+                                    breakdown.abu.va.push(catAvg);
+                                } else if (cNameLower.includes('schluss') || cNameLower.includes('prüfung')) {
+                                    breakdown.abu.sp.push(catAvg);
+                                }
+                            }
+                            
+                            // Explicit IPA sorting
+                            if (nameLower.includes('ipa') || nameLower.includes('praktisch')) {
+                                 if (cNameLower.includes('resultat')) ipaRes = roundHalf(catAvg);
+                                 else if (cNameLower.includes('doku')) ipaDok = roundHalf(catAvg);
+                                 else if (cNameLower.includes('fach') || cNameLower.includes('präsentation')) ipaFach = roundHalf(catAvg);
+                            }
+
+                            subjSum += catSum;
+                            subjWeight += catWeight;
+                        }
+                    });
+
+                    // Route remaining Subjects
+                    if (subjWeight > 0 || ipaRes || ipaDok || ipaFach) {
+                        let avg = subjWeight > 0 ? subjSum / subjWeight : 0;
+                        let entry = { name: subjName, sem: semName.replace('Semester ', 'Sem '), avg: avg };
+
+                        if (nameLower.includes('ük') || nameLower.includes('uek')) {
+                            breakdown.ikUek.push(entry);
+                        } else if (nameLower.includes('informatik') || nameLower.includes('modul') || nameLower.includes('bk')) {
+                            breakdown.ikBfs.push(entry);
+                        } else if (nameLower.includes('math')) {
+                            breakdown.egkSemesters[semName].math = roundHalf(avg);
+                        } else if (nameLower.includes('englisch') || nameLower.includes('englsich') || nameLower.includes('english')) {
+                            breakdown.egkSemesters[semName].eng = roundHalf(avg);
+                        } else if (nameLower.includes('ipa')) {
+                            if (ipaRes || ipaDok || ipaFach) {
+                                let ipaTotal = 0, ipaW = 0;
+                                if (ipaRes) { ipaTotal += ipaRes * 0.50; ipaW += 0.50; }
+                                if (ipaDok) { ipaTotal += ipaDok * 0.25; ipaW += 0.25; }
+                                if (ipaFach) { ipaTotal += ipaFach * 0.25; ipaW += 0.25; }
+                                entry.avg = ipaTotal / ipaW;
+                            }
+                            breakdown.ipa.push(entry);
+                        }
+                    }
+                });
+            });
+
+            const renderList = (arr, elementId) => {
+                const el = document.getElementById(elementId);
+                if (arr.length === 0) { el.innerHTML = '<p class="text-[10px] text-slate-500 italic py-1">No grades entered yet.</p>'; return; }
+                el.innerHTML = arr.map(item => `
+                    <div class="flex justify-between items-center text-xs py-0.5 border-b border-slate-700/30 last:border-0">
+                        <span class="text-slate-400"><span class="text-[9px] text-slate-500 mr-1">${item.sem}</span> ${item.name}</span>
+                        <span class="font-bold text-slate-300" style="color: ${getGradeColor(item.avg)}">${item.avg.toFixed(2)}</span>
+                    </div>
+                `).join('');
+            };
+
+            // IK Block
+            renderList(breakdown.ikBfs, 'qv-modal-ik-bfs-list');
+            renderList(breakdown.ikUek, 'qv-modal-ik-uek-list');
+            let bfsRaw = calcAvg(breakdown.ikBfs);
+            let bfsRound = breakdown.ikBfs.length > 0 ? roundHalf(bfsRaw) : 0;
+            document.getElementById('qv-modal-ik-bfs-raw').innerText = bfsRaw > 0 ? bfsRaw.toFixed(3) : '--';
+            document.getElementById('qv-modal-ik-bfs-round').innerText = bfsRound > 0 ? bfsRound.toFixed(1) : '--';
+
+            let uekRaw = calcAvg(breakdown.ikUek);
+            let uekRound = breakdown.ikUek.length > 0 ? roundHalf(uekRaw) : 0;
+            document.getElementById('qv-modal-ik-uek-raw').innerText = uekRaw > 0 ? uekRaw.toFixed(3) : '--';
+            document.getElementById('qv-modal-ik-uek-round').innerText = uekRound > 0 ? uekRound.toFixed(1) : '--';
+
+            let ikFinal = 0;
+            if (bfsRound > 0 && uekRound > 0) ikFinal = roundTenth((bfsRound * 0.80) + (uekRound * 0.20));
+            else if (bfsRound > 0) ikFinal = bfsRound;
+            else if (uekRound > 0) ikFinal = uekRound;
+            
+            document.getElementById('qv-modal-ik-final').innerText = ikFinal > 0 ? ikFinal.toFixed(1) : '--';
+            document.getElementById('qv-modal-ik-final').style.color = getGradeColor(ikFinal);
+
+            // IPA Block
+            renderList(breakdown.ipa, 'qv-modal-ipa-list');
+            let ipaRaw = calcAvg(breakdown.ipa);
+            let ipaFinal = breakdown.ipa.length > 0 ? roundTenth(ipaRaw) : 0;
+            
+            document.getElementById('qv-modal-ipa-raw').innerText = ipaRaw > 0 ? ipaRaw.toFixed(3) : '--';
+            document.getElementById('qv-modal-ipa-round').innerText = ipaFinal > 0 ? ipaFinal.toFixed(1) : '--';
+            document.getElementById('qv-modal-ipa-final').innerText = ipaFinal > 0 ? ipaFinal.toFixed(1) : '--';
+            document.getElementById('qv-modal-ipa-final').style.color = getGradeColor(ipaFinal);
+
+            // ABU Block (Strict UI Implementation)
+            let abuSpracheRaw = calcAvgPlain(breakdown.abu.sprache);
+            let abuGesRaw = calcAvgPlain(breakdown.abu.gesellschaft);
+            
+            document.getElementById('qv-modal-abu-sprache').innerText = abuSpracheRaw > 0 ? abuSpracheRaw.toFixed(2) : '--';
+            document.getElementById('qv-modal-abu-sprache').style.color = abuSpracheRaw > 0 ? getGradeColor(abuSpracheRaw) : '';
+            document.getElementById('qv-modal-abu-gesellschaft').innerText = abuGesRaw > 0 ? abuGesRaw.toFixed(2) : '--';
+            document.getElementById('qv-modal-abu-gesellschaft').style.color = abuGesRaw > 0 ? getGradeColor(abuGesRaw) : '';
+
+            let erfaTotal = 0, erfaDiv = 0;
+            if (abuSpracheRaw > 0) { erfaTotal += abuSpracheRaw; erfaDiv++; }
+            if (abuGesRaw > 0) { erfaTotal += abuGesRaw; erfaDiv++; }
+            let erfaFinal = erfaDiv > 0 ? (erfaTotal / erfaDiv) : null;
+            
+            document.getElementById('qv-modal-abu-erfa-raw').innerText = erfaFinal ? erfaFinal.toFixed(2) : '--';
+
+            let vaFinal = calcAvgPlain(breakdown.abu.va) || null;
+            let spFinal = calcAvgPlain(breakdown.abu.sp) || null;
+            
+            document.getElementById('qv-modal-abu-va').innerText = vaFinal ? vaFinal.toFixed(2) : '--';
+            document.getElementById('qv-modal-abu-va').style.color = vaFinal ? getGradeColor(vaFinal) : '';
+            document.getElementById('qv-modal-abu-sp').innerText = spFinal ? spFinal.toFixed(2) : '--';
+            document.getElementById('qv-modal-abu-sp').style.color = spFinal ? getGradeColor(spFinal) : '';
+
+            let abuFinalSum = 0, abuFinalW = 0;
+            if (erfaFinal) { abuFinalSum += erfaFinal * (1/3); abuFinalW += (1/3); }
+            if (vaFinal) { abuFinalSum += vaFinal * (1/3); abuFinalW += (1/3); }
+            if (spFinal) { abuFinalSum += spFinal * (1/3); abuFinalW += (1/3); }
+            
+            let abuRaw = abuFinalW > 0 ? (abuFinalSum / abuFinalW) : 0;
+            let abuFinal = abuRaw > 0 ? roundTenth(abuRaw) : 0;
+
+            document.getElementById('qv-modal-abu-raw').innerText = abuRaw > 0 ? abuRaw.toFixed(3) : '--';
+            document.getElementById('qv-modal-abu-round').innerText = abuFinal > 0 ? abuFinal.toFixed(1) : '--';
+            document.getElementById('qv-modal-abu-final').innerText = abuFinal > 0 ? abuFinal.toFixed(1) : '--';
+            document.getElementById('qv-modal-abu-final').style.color = getGradeColor(abuFinal);
+
+            // eGK Block Custom Render
+            let egkHtml = '';
+            let egkTotalSum = 0;
+            let egkTotalCount = 0;
+
+            Object.entries(breakdown.egkSemesters).forEach(([sem, grades]) => {
+                if (grades.math !== null || grades.eng !== null) {
+                    let sum = 0, count = 0;
+                    let mGrade = grades.math !== null ? grades.math.toFixed(2) : '--';
+                    let eGrade = grades.eng !== null ? grades.eng.toFixed(2) : '--';
+
+                    if (grades.math !== null) { sum += grades.math; count++; }
+                    if (grades.eng !== null) { sum += grades.eng; count++; }
+                    let semAvg = roundHalf(sum / count);
+
+                    egkTotalSum += semAvg;
+                    egkTotalCount++;
+
+                    let shortSem = sem.replace('Semester ', 'Sem ');
+
+                    egkHtml += `
+                        <div class="bg-slate-900/30 p-3 rounded-lg border border-slate-700/50 shrink-0">
+                            <p class="text-xs font-semibold text-slate-300 mb-2 border-b border-slate-700/50 pb-1">${shortSem}</p>
+                            <div class="flex justify-between items-center text-xs py-1">
+                                <span class="text-slate-400">Mathematik <span class="text-[9px] ml-1 text-slate-500">(Rd 1/2)</span></span>
+                                <span class="font-bold text-slate-300" style="color: ${grades.math !== null ? getGradeColor(grades.math) : ''}">${mGrade}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs py-1">
+                                <span class="text-slate-400">Englisch <span class="text-[9px] ml-1 text-slate-500">(Rd 1/2)</span></span>
+                                <span class="font-bold text-slate-300" style="color: ${grades.eng !== null ? getGradeColor(grades.eng) : ''}">${eGrade}</span>
+                            </div>
+                            <div class="mt-2 pt-2 border-t border-slate-700/50 flex justify-between items-center text-[10px] font-mono text-slate-400">
+                                <span>Semester Durchschnitt:</span>
+                                <span class="text-white font-bold" style="color: ${getGradeColor(semAvg)}">${semAvg.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            const egkListEl = document.getElementById('qv-modal-egk-list');
+            if (egkTotalCount === 0) {
+                egkListEl.innerHTML = '<p class="text-[10px] text-slate-500 italic py-1">No Math or English grades entered yet.</p>';
+            } else {
+                egkListEl.innerHTML = egkHtml;
+            }
+
+            let egkRaw = egkTotalCount > 0 ? (egkTotalSum / egkTotalCount) : 0;
+            let egkFinal = egkTotalCount > 0 ? roundHalf(egkRaw) : 0; 
+            
+            document.getElementById('qv-modal-egk-raw').innerText = egkRaw > 0 ? egkRaw.toFixed(3) : '--';
+            document.getElementById('qv-modal-egk-round').innerText = egkFinal > 0 ? egkFinal.toFixed(1) : '--';
+            document.getElementById('qv-modal-egk-final').innerText = egkFinal > 0 ? egkFinal.toFixed(1) : '--';
+            document.getElementById('qv-modal-egk-final').style.color = getGradeColor(egkFinal);
+
+            // Overall Project Final Grade Calculation
+            let totalWeight = 0;
+            let weightedSum = 0;
+            if (ikFinal > 0) { weightedSum += ikFinal * 0.30; totalWeight += 0.30; }
+            if (abuFinal > 0) { weightedSum += abuFinal * 0.20; totalWeight += 0.20; }
+            if (egkFinal > 0) { weightedSum += egkFinal * 0.10; totalWeight += 0.10; }
+            if (ipaFinal > 0) { weightedSum += ipaFinal * 0.40; totalWeight += 0.40; }
+
+            let qvFinal = totalWeight > 0 ? roundTenth(weightedSum / totalWeight) : 0;
+            
+            const finalEl = document.getElementById('qv-modal-final');
+            finalEl.innerText = qvFinal > 0 ? qvFinal.toFixed(1) : '0.0';
+            finalEl.style.color = qvFinal > 0 ? getGradeColor(qvFinal) : '';
+
+            // Update Status Banner
+            const statusEl = document.getElementById('qv-modal-status');
+            const statusIcon = document.getElementById('qv-modal-status-icon');
+            const statusBox = document.getElementById('qv-modal-status-box');
+
+            if (qvFinal === 0) {
+                statusEl.innerText = "Add subjects to track your standing.";
+                statusBox.className = "mb-6 p-4 rounded-xl bg-slate-800 border border-slate-700 flex items-center gap-3 shrink-0";
+                statusIcon.setAttribute('data-lucide', 'info');
+                statusIcon.className = "text-slate-400";
+            } else if ((ipaFinal > 0 && ipaFinal < 4.0) || (ikFinal > 0 && ikFinal < 4.0) || qvFinal < 4.0) {
+                statusEl.innerText = "Currently Failing. You need at least a 4.0 in IK, IPA, and Overall.";
+                statusBox.className = "mb-6 p-4 rounded-xl bg-red-900/20 border border-red-500/30 flex items-center gap-3 shrink-0";
+                statusIcon.setAttribute('data-lucide', 'alert-triangle');
+                statusIcon.className = "text-red-400";
+            } else {
+                statusEl.innerText = `Passing! Projected using ${Math.round(totalWeight * 100)}% of your final grade.`;
+                statusBox.className = "mb-6 p-4 rounded-xl bg-green-900/20 border border-green-500/30 flex items-center gap-3 shrink-0";
+                statusIcon.setAttribute('data-lucide', 'check-circle');
+                statusIcon.className = "text-green-400";
+            }
+            
+            lucide.createIcons();
+        }
+
     </script>
 </body>
 </html>
