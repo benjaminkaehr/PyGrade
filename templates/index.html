@@ -1901,7 +1901,7 @@
 
                             // Explicit ABU sorting
                             if (nameLower.includes('abu') || nameLower.includes('allgemeinbildung')) {
-                                if (cNameLower.includes('sprache') || cNameLower.includes('kommunikation')) {
+                                if (cNameLower.includes('sprache') || cNameLower.includes('kommunikation') || cNameLower.includes('s&k') || cNameLower.includes('s & k')) {
                                     // Zeugnisnoten are rounded to 1/2 per semester
                                     breakdown.abu.sprache.push(roundHalf(catAvg)); 
                                 } else if (cNameLower.includes('gesellschaft')) {
